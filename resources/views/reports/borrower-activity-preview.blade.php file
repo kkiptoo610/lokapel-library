@@ -1,0 +1,733 @@
+@extends('layouts.app')
+
+@section('content')
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+
+    <div>
+
+        <h1>Borrower Activity Report Preview</h1>
+
+        <p class="text-muted mb-0">
+            Preview the complete borrowing history before printing.
+        </p>
+
+    </div>
+
+
+    <div>
+
+        <a
+            href="{{ route('reports.borrower-activity', request()->query()) }}"
+            class="btn btn-secondary"
+        >
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back
+
+        </a>
+
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="window.print()"
+        >
+
+            <i class="bi bi-printer"></i>
+
+            Print Report
+
+        </button>
+
+    </div>
+
+</div>
+
+
+{{-- ========================================================= --}}
+{{-- REPORT HEADER --}}
+{{-- ========================================================= --}}
+
+<div class="text-center mb-4">
+
+    <h2 class="mb-1">
+
+        Borrower Activity Report
+
+    </h2>
+
+
+    <p class="mb-0 text-muted">
+
+        Generated on:
+
+        {{ $reportDate->format('d M Y, h:i A') }}
+
+    </p>
+
+</div>
+
+
+{{-- ========================================================= --}}
+{{-- BORROWER INFORMATION --}}
+{{-- ========================================================= --}}
+
+@if($borrower)
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <h4 class="mb-3">
+
+                Borrower Information
+
+            </h4>
+
+
+            <div class="row">
+
+
+                {{-- NAME --}}
+
+                <div class="col-md-4 mb-3">
+
+                    <strong>
+
+                        Name:
+
+                    </strong>
+
+                    <br>
+
+                    {{ $borrower->name }}
+
+                </div>
+
+
+                {{-- BORROWER TYPE --}}
+
+                <div class="col-md-4 mb-3">
+
+                    <strong>
+
+                        Borrower Type:
+
+                    </strong>
+
+                    <br>
+
+
+                    @if(
+                        $borrower instanceof
+                        \App\Models\Learner
+                    )
+
+                        Learner
+
+                    @elseif(
+                        $borrower instanceof
+                        \App\Models\Teacher
+                    )
+
+                        Teacher
+
+                    @elseif(
+                        $borrower instanceof
+                        \App\Models\Staff
+                    )
+
+                        Staff
+
+                    @else
+
+                        Unknown
+
+                    @endif
+
+                </div>
+
+
+                {{-- LEARNER ADMISSION NUMBER --}}
+
+                @if(
+                    $borrower instanceof
+                    \App\Models\Learner
+                )
+
+                    <div class="col-md-4 mb-3">
+
+                        <strong>
+
+                            Admission Number:
+
+                        </strong>
+
+                        <br>
+
+                        {{ $borrower->admission_number ?? '-' }}
+
+                    </div>
+
+
+                    {{-- GRADE --}}
+
+                    <div class="col-md-4 mb-3">
+
+                        <strong>
+
+                            Grade:
+
+                        </strong>
+
+                        <br>
+
+                        {{ $borrower->grade_class ?? '-' }}
+
+                    </div>
+
+
+                    {{-- STREAM --}}
+
+                    <div class="col-md-4 mb-3">
+
+                        <strong>
+
+                            Stream:
+
+                        </strong>
+
+                        <br>
+
+                        {{ $borrower->stream ?? '-' }}
+
+                    </div>
+
+                @endif
+
+
+                {{-- PHONE NUMBER FOR TEACHER / STAFF --}}
+
+                @if(
+                    !($borrower instanceof \App\Models\Learner)
+                    &&
+                    ($borrower->phone_number ?? false)
+                )
+
+                    <div class="col-md-4 mb-3">
+
+                        <strong>
+
+                            Phone:
+
+                        </strong>
+
+                        <br>
+
+                        {{ $borrower->phone_number }}
+
+                    </div>
+
+                @endif
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- BORROWING SUMMARY --}}
+    {{-- ========================================================= --}}
+
+    @php
+
+        $totalBorrowings =
+            $borrowings->count();
+
+
+        $returnedBorrowings =
+            $borrowings
+                ->where(
+                    'status',
+                    'returned'
+                )
+                ->count();
+
+
+        $activeBorrowings =
+            $borrowings
+                ->whereIn(
+                    'status',
+                    [
+                        'borrowed',
+                        'overdue',
+                    ]
+                )
+                ->count();
+
+
+        $overdueBorrowings =
+            $borrowings
+                ->where(
+                    'status',
+                    'overdue'
+                )
+                ->count();
+
+    @endphp
+
+
+    <div class="row mb-4">
+
+
+        {{-- TOTAL --}}
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card shadow-sm text-center">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Total Borrowings
+
+                    </small>
+
+                    <h3 class="mb-0">
+
+                        {{ $totalBorrowings }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- ACTIVE --}}
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card shadow-sm text-center">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Active Borrowings
+
+                    </small>
+
+                    <h3 class="mb-0 text-warning">
+
+                        {{ $activeBorrowings }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- RETURNED --}}
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card shadow-sm text-center">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Returned
+
+                    </small>
+
+                    <h3 class="mb-0 text-success">
+
+                        {{ $returnedBorrowings }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- OVERDUE --}}
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card shadow-sm text-center">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Overdue
+
+                    </small>
+
+                    <h3 class="mb-0 text-danger">
+
+                        {{ $overdueBorrowings }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- BORROWING HISTORY --}}
+    {{-- ========================================================= --}}
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>
+
+                Complete Borrowing History
+
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Book</th>
+
+                            <th>Book Code</th>
+
+                            <th>Exact Physical Copy Number</th>
+
+                            <th>Borrowed Date</th>
+
+                            <th>Due Date</th>
+
+                            <th>Returned Date</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @forelse($borrowings as $borrowing)
+
+                            <tr>
+
+
+                                {{-- NUMBER --}}
+
+                                <td>
+
+                                    {{ $loop->iteration }}
+
+                                </td>
+
+
+                                {{-- BOOK --}}
+
+                                <td>
+
+                                    <strong>
+
+                                        {{ $borrowing->book?->title ?? '-' }}
+
+                                    </strong>
+
+
+                                    @if(
+                                        $borrowing->book?->author
+                                    )
+
+                                        <br>
+
+                                        <small class="text-muted">
+
+                                            {{ $borrowing->book->author }}
+
+                                        </small>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- BOOK CODE --}}
+
+                                <td>
+
+                                    <strong class="text-primary">
+
+                                        {{ $borrowing->book?->book_code ?? '-' }}
+
+                                    </strong>
+
+                                </td>
+
+
+                                {{-- EXACT LMS PHYSICAL COPY NUMBER --}}
+
+                                <td>
+
+                                    <strong class="text-success">
+
+                                        {{ $borrowing->bookCopy?->copy_number ?? '-' }}
+
+                                    </strong>
+
+                                </td>
+
+
+                                {{-- BORROWED DATE --}}
+
+                                <td>
+
+                                    {{ $borrowing->borrowed_date }}
+
+                                </td>
+
+
+                                {{-- DUE DATE --}}
+
+                                <td>
+
+                                    {{ $borrowing->due_date ?? '-' }}
+
+                                </td>
+
+
+                                {{-- RETURNED DATE --}}
+
+                                <td>
+
+                                    {{ $borrowing->returned_date ?? '-' }}
+
+                                </td>
+
+
+                                {{-- STATUS --}}
+
+                                <td>
+
+                                    @if(
+                                        $borrowing->status ===
+                                        'borrowed'
+                                    )
+
+                                        <span
+                                            class="badge text-bg-warning"
+                                        >
+
+                                            Borrowed
+
+                                        </span>
+
+
+                                    @elseif(
+                                        $borrowing->status ===
+                                        'overdue'
+                                    )
+
+                                        <span
+                                            class="badge text-bg-danger"
+                                        >
+
+                                            Overdue
+
+                                        </span>
+
+
+                                    @elseif(
+                                        $borrowing->status ===
+                                        'returned'
+                                    )
+
+                                        <span
+                                            class="badge text-bg-success"
+                                        >
+
+                                            Returned
+
+                                        </span>
+
+
+                                    @else
+
+                                        <span
+                                            class="badge text-bg-secondary"
+                                        >
+
+                                            {{ ucfirst($borrowing->status) }}
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                            </tr>
+
+
+                        @empty
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="text-center text-muted py-4"
+                                >
+
+                                    No borrowing history found.
+
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+@else
+
+
+    {{-- ========================================================= --}}
+    {{-- NO BORROWER --}}
+    {{-- ========================================================= --}}
+
+    <div class="alert alert-warning">
+
+        No borrower was selected.
+
+    </div>
+
+
+@endif
+
+
+{{-- ========================================================= --}}
+{{-- PRINT STYLES --}}
+{{-- ========================================================= --}}
+
+<style>
+
+@media print {
+
+
+    body {
+
+        background: white !important;
+
+    }
+
+
+    .no-print {
+
+        display: none !important;
+
+    }
+
+
+    .btn {
+
+        display: none !important;
+
+    }
+
+
+    .sidebar {
+
+        display: none !important;
+
+    }
+
+
+    .content {
+
+        margin-left: 0 !important;
+
+        padding: 0 !important;
+
+    }
+
+
+    .card {
+
+        box-shadow: none !important;
+
+        border: none !important;
+
+    }
+
+
+    .card-header {
+
+        background: white !important;
+
+    }
+
+
+    .table {
+
+        font-size: 12px;
+
+    }
+
+
+    .badge {
+
+        border: 1px solid #000 !important;
+
+    }
+
+
+}
+
+</style>
+
+@endsection
