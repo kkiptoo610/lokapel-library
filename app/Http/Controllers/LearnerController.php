@@ -3,20 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Learner;
+
 use Illuminate\Http\Request;
 
 class LearnerController extends Controller
 {
+
     /**
      * Display all learners.
      */
+
     public function index(Request $request)
     {
+
         $query = Learner::query();
 
         /*
          * Search learners.
          */
+
         if ($request->filled('search')) {
 
             $search = $request->search;
@@ -24,21 +29,25 @@ class LearnerController extends Controller
             $query->where(function ($q) use ($search) {
 
                 $q->where('name', 'like', "%{$search}%")
+
                     ->orWhere(
                         'admission_number',
                         'like',
                         "%{$search}%"
                     )
+
                     ->orWhere(
                         'assessment_number',
                         'like',
                         "%{$search}%"
                     )
+
                     ->orWhere(
                         'grade_class',
                         'like',
                         "%{$search}%"
                     )
+
                     ->orWhere(
                         'stream',
                         'like',
@@ -46,13 +55,38 @@ class LearnerController extends Controller
                     );
 
             });
+
         }
 
 
+        /*
+         * Arrange learners by:
+         *
+         * 1. Grade/Class number from smaller to bigger.
+         * 2. Stream: West, then East.
+         * 3. Admission number from smaller to bigger.
+         */
+
         $learners = $query
-            ->orderBy('grade_class')
-            ->orderBy('stream')
-            ->orderBy('name')
+
+            ->orderByRaw(
+                "CAST(REGEXP_REPLACE(grade_class, '[^0-9]', '') AS UNSIGNED)"
+            )
+
+            ->orderByRaw(
+                "
+                CASE stream
+                    WHEN 'West' THEN 1
+                    WHEN 'East' THEN 2
+                    ELSE 3
+                END
+                "
+            )
+
+            ->orderByRaw(
+                "CAST(REGEXP_REPLACE(admission_number, '[^0-9]', '') AS UNSIGNED)"
+            )
+
             ->get();
 
 
@@ -60,23 +94,31 @@ class LearnerController extends Controller
             'learners.index',
             compact('learners')
         );
+
     }
+
 
 
     /**
      * Show the form for adding one learner.
      */
+
     public function create()
     {
+
         return view('learners.create');
+
     }
+
 
 
     /**
      * Store one learner.
      */
+
     public function store(Request $request)
     {
+
         $validated = $request->validate([
 
             'name' => 'required|string|max:255',
@@ -85,7 +127,7 @@ class LearnerController extends Controller
                 'required|string|max:100|unique:learners,admission_number',
 
             'assessment_number' =>
-                'nullable|string|max:100',
+                'nullable|string|max:100|unique:learners,assessment_number',
 
             'grade_class' =>
                 'required|string|max:100',
@@ -105,52 +147,66 @@ class LearnerController extends Controller
                 'success',
                 'Learner added successfully.'
             );
+
     }
+
 
 
     /**
      * Display one learner.
      */
+
     public function show(Learner $learner)
     {
+
         $learner->load('borrowings.book');
 
         return view(
             'learners.show',
             compact('learner')
         );
+
     }
+
 
 
     /**
      * Show the form for editing a learner.
      */
+
     public function edit(Learner $learner)
     {
+
         return view(
             'learners.edit',
             compact('learner')
         );
+
     }
+
 
 
     /**
      * Update learner information.
      */
+
     public function update(
         Request $request,
         Learner $learner
     ) {
+
         $validated = $request->validate([
 
-            'name' => 'required|string|max:255',
+            'name' =>
+                'required|string|max:255',
 
             'admission_number' =>
                 'required|string|max:100|unique:learners,admission_number,' .
                 $learner->id,
 
             'assessment_number' =>
-                'nullable|string|max:100',
+                'nullable|string|max:100|unique:learners,assessment_number,' .
+                $learner->id,
 
             'grade_class' =>
                 'required|string|max:100',
@@ -170,25 +226,37 @@ class LearnerController extends Controller
                 'success',
                 'Learner updated successfully.'
             );
+
     }
+
 
 
     /**
      * Delete learner.
      */
+
     public function destroy(Learner $learner)
     {
+
         /*
          * Prevent deletion if the learner
-         * has an active borrowed or overdue book.
+         * currently has a borrowed or overdue book.
          */
+
         if (
+
             $learner->borrowings()
+
                 ->whereIn(
                     'status',
-                    ['borrowed', 'overdue']
+                    [
+                        'borrowed',
+                        'overdue',
+                    ]
                 )
+
                 ->exists()
+
         ) {
 
             return redirect()
@@ -210,23 +278,31 @@ class LearnerController extends Controller
                 'success',
                 'Learner deleted successfully.'
             );
+
     }
+
 
 
     /**
      * Show the batch upload page.
      */
+
     public function showImportForm()
     {
+
         return view('learners.import');
+
     }
+
 
 
     /**
      * Import learners from CSV.
      */
+
     public function import(Request $request)
     {
+
         $request->validate([
 
             'grade_class' =>
@@ -263,6 +339,7 @@ class LearnerController extends Controller
         /*
          * Read the first row as headers.
          */
+
         $headers = fgetcsv($handle);
 
 
@@ -279,9 +356,11 @@ class LearnerController extends Controller
 
 
         /*
-         * Remove invisible characters and spaces.
+         * Remove BOM and spaces.
          */
+
         $headers = array_map(
+
             function ($header) {
 
                 return trim(
@@ -293,13 +372,16 @@ class LearnerController extends Controller
                 );
 
             },
+
             $headers
+
         );
 
 
         /*
          * Required CSV headers.
          */
+
         $requiredHeaders = [
 
             'name',
@@ -314,10 +396,13 @@ class LearnerController extends Controller
         foreach ($requiredHeaders as $requiredHeader) {
 
             if (
+
                 !in_array(
                     $requiredHeader,
-                    $headers
+                    $headers,
+                    true
                 )
+
             ) {
 
                 fclose($handle);
@@ -335,25 +420,26 @@ class LearnerController extends Controller
         /*
          * Get positions of the columns.
          */
-        $nameIndex =
-            array_search(
-                'name',
-                $headers
-            );
+
+        $nameIndex = array_search(
+            'name',
+            $headers,
+            true
+        );
 
 
-        $admissionIndex =
-            array_search(
-                'admission_number',
-                $headers
-            );
+        $admissionIndex = array_search(
+            'admission_number',
+            $headers,
+            true
+        );
 
 
-        $assessmentIndex =
-            array_search(
-                'assessment_number',
-                $headers
-            );
+        $assessmentIndex = array_search(
+            'assessment_number',
+            $headers,
+            true
+        );
 
 
         $imported = 0;
@@ -374,16 +460,25 @@ class LearnerController extends Controller
             /*
              * Skip completely empty rows.
              */
+
             if (
+
                 empty(
+
                     array_filter(
+
                         $row,
+
                         fn ($value) =>
+
                             trim(
                                 (string) $value
                             ) !== ''
+
                     )
+
                 )
+
             ) {
 
                 continue;
@@ -391,30 +486,37 @@ class LearnerController extends Controller
             }
 
 
-            $name =
-                trim(
+            $name = trim(
+                (string) (
                     $row[$nameIndex] ?? ''
-                );
+                )
+            );
 
 
-            $admissionNumber =
-                trim(
+            $admissionNumber = trim(
+                (string) (
                     $row[$admissionIndex] ?? ''
-                );
+                )
+            );
 
 
-            $assessmentNumber =
-                trim(
+            $assessmentNumber = trim(
+                (string) (
                     $row[$assessmentIndex] ?? ''
-                );
+                )
+            );
 
 
             /*
              * Name and admission number are required.
              */
+
             if (
+
                 $name === '' ||
+
                 $admissionNumber === ''
+
             ) {
 
                 $skipped++;
@@ -427,11 +529,14 @@ class LearnerController extends Controller
             /*
              * Skip duplicate admission numbers.
              */
+
             if (
+
                 Learner::where(
                     'admission_number',
                     $admissionNumber
                 )->exists()
+
             ) {
 
                 $skipped++;
@@ -440,6 +545,32 @@ class LearnerController extends Controller
 
             }
 
+
+            /*
+             * Skip duplicate assessment numbers.
+             */
+
+            if (
+
+                $assessmentNumber !== '' &&
+
+                Learner::where(
+                    'assessment_number',
+                    $assessmentNumber
+                )->exists()
+
+            ) {
+
+                $skipped++;
+
+                continue;
+
+            }
+
+
+            /*
+             * Create learner.
+             */
 
             Learner::create([
 
@@ -450,6 +581,7 @@ class LearnerController extends Controller
                     $admissionNumber,
 
                 'assessment_number' =>
+
                     $assessmentNumber !== ''
                         ? $assessmentNumber
                         : null,
@@ -478,16 +610,20 @@ class LearnerController extends Controller
                 $imported .
                 ' learner(s) imported successfully. ' .
                 $skipped .
-                ' row(s) were skipped.'
+                ' duplicate or invalid row(s) were skipped.'
             );
+
     }
+
 
 
     /**
      * Download CSV template.
      */
+
     public function downloadTemplate()
     {
+
         $filename =
             'learners_import_template.csv';
 
@@ -514,6 +650,10 @@ class LearnerController extends Controller
                 );
 
 
+            /*
+             * CSV headers.
+             */
+
             fputcsv(
                 $file,
                 [
@@ -524,6 +664,10 @@ class LearnerController extends Controller
             );
 
 
+            /*
+             * Example learner.
+             */
+
             fputcsv(
                 $file,
                 [
@@ -533,6 +677,10 @@ class LearnerController extends Controller
                 ]
             );
 
+
+            /*
+             * Example learner without assessment number.
+             */
 
             fputcsv(
                 $file,
@@ -555,5 +703,7 @@ class LearnerController extends Controller
                 200,
                 $headers
             );
+
     }
+
 }

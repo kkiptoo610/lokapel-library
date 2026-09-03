@@ -87,6 +87,8 @@
 
         body {
 
+            margin: 0;
+
             background:
 
                 linear-gradient(
@@ -117,13 +119,17 @@
 
             width: 260px;
 
-            min-height: 100vh;
+            height: 100vh;
 
             position: fixed;
 
             top: 0;
 
             left: 0;
+
+            display: flex;
+
+            flex-direction: column;
 
             overflow-y: auto;
 
@@ -175,6 +181,7 @@
             border-bottom:
 
                 1px solid
+
                 rgba(
                     255,
                     255,
@@ -212,6 +219,7 @@
             box-shadow:
 
                 0 8px 20px
+
                 rgba(
                     59,
                     130,
@@ -238,6 +246,19 @@
             opacity: 0.65;
 
             font-weight: 400;
+
+        }
+
+
+        /* ========================================================= */
+        /* SIDEBAR NAVIGATION AREA */
+        /* ========================================================= */
+
+        .sidebar-navigation {
+
+            flex: 1;
+
+            padding-bottom: 20px;
 
         }
 
@@ -333,6 +354,7 @@
             box-shadow:
 
                 0 8px 20px
+
                 rgba(
                     37,
                     99,
@@ -370,6 +392,239 @@
 
                 24px 22px
                 8px;
+
+        }
+
+
+        /* ========================================================= */
+        /* USER ACCOUNT AREA */
+        /* ========================================================= */
+
+        .user-account-section {
+
+            padding:
+
+                15px 12px;
+
+            border-top:
+
+                1px solid
+
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+        }
+
+
+        .user-account {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding:
+
+                12px;
+
+            border-radius: 12px;
+
+            background:
+
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.06
+                );
+
+        }
+
+
+        .user-avatar {
+
+            width: 42px;
+
+            height: 42px;
+
+            min-width: 42px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 50%;
+
+            color: white;
+
+            font-size: 19px;
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    #2563EB,
+                    #60A5FA
+                );
+
+        }
+
+
+        .user-details {
+
+            min-width: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .user-name {
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        .user-role {
+
+            margin-top: 2px;
+
+            color:
+
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.55
+                );
+
+            font-size: 11px;
+
+        }
+
+
+        /* ========================================================= */
+        /* LOGOUT AREA */
+        /* ========================================================= */
+
+        .logout-section {
+
+            padding:
+
+                0 12px
+                20px;
+
+        }
+
+
+        .logout-form {
+
+            margin: 0;
+
+        }
+
+
+        .logout-button {
+
+            width: calc(100% - 24px);
+
+            margin: 0 12px;
+
+            border: none;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            padding:
+
+                12px 18px;
+
+            border-radius: 10px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            color: #FCA5A5;
+
+            background:
+
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.10
+                );
+
+            cursor: pointer;
+
+            transition:
+
+                all
+                0.25s
+                ease;
+
+        }
+
+
+        .logout-button i {
+
+            font-size: 18px;
+
+        }
+
+
+        .logout-button:hover {
+
+            color: white;
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    #DC2626,
+                    #EF4444
+                );
+
+            transform:
+
+                translateY(-2px);
+
+            box-shadow:
+
+                0 8px 20px
+
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.25
+                );
 
         }
 
@@ -477,6 +732,7 @@
             border:
 
                 1px solid
+
                 rgba(
                     226,
                     232,
@@ -489,6 +745,7 @@
             box-shadow:
 
                 0 10px 30px
+
                 rgba(
                     15,
                     23,
@@ -530,6 +787,7 @@
         /* ========================================================= */
 
         .form-control,
+
         .form-select {
 
             border-radius: 10px;
@@ -537,6 +795,7 @@
             border:
 
                 1px solid
+
                 var(--border);
 
             min-height: 46px;
@@ -547,6 +806,7 @@
 
 
         .form-control:focus,
+
         .form-select:focus {
 
             border-color:
@@ -556,6 +816,7 @@
             box-shadow:
 
                 0 0 0 4px
+
                 rgba(
                     37,
                     99,
@@ -604,6 +865,7 @@
             box-shadow:
 
                 0 6px 15px
+
                 rgba(
                     37,
                     99,
@@ -951,7 +1213,16 @@
 
                 width: 100%;
 
+                height: auto;
+
                 min-height: auto;
+
+            }
+
+
+            .sidebar-navigation {
+
+                flex: none;
 
             }
 
@@ -992,7 +1263,9 @@
 <div class="sidebar">
 
 
+    <!-- ========================================================= -->
     <!-- BRAND -->
+    <!-- ========================================================= -->
 
     <div class="brand">
 
@@ -1018,141 +1291,273 @@
     </div>
 
 
-    <!-- DASHBOARD -->
+    <!-- ========================================================= -->
+    <!-- NAVIGATION -->
+    <!-- ========================================================= -->
 
-    <a
-        href="{{ route('dashboard') }}"
-        class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-grid-1x2-fill"></i>
-
-        Dashboard
-
-    </a>
+    <div class="sidebar-navigation">
 
 
-    <!-- LIBRARY MANAGEMENT -->
+        <!-- DASHBOARD -->
 
-    <div class="nav-section">
+        <a
+            href="{{ route('dashboard') }}"
+            class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"
+        >
 
-        Library Management
+            <i class="bi bi-grid-1x2-fill"></i>
+
+            Dashboard
+
+        </a>
+
+
+        <!-- LIBRARY MANAGEMENT -->
+
+        <div class="nav-section">
+
+            Library Management
+
+        </div>
+
+
+        <!-- CATEGORIES -->
+
+        <a
+            href="{{ route('categories.index') }}"
+            class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-tags"></i>
+
+            Categories
+
+        </a>
+
+
+        <!-- BOOKS -->
+
+        <a
+            href="{{ route('books.index') }}"
+            class="{{ request()->routeIs('books.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-book-half"></i>
+
+            Books
+
+        </a>
+
+
+        <!-- BORROWERS -->
+
+        <div class="nav-section">
+
+            Borrowers
+
+        </div>
+
+
+        <!-- TEACHERS -->
+
+        <a
+            href="{{ route('teachers.index') }}"
+            class="{{ request()->routeIs('teachers.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-person-workspace"></i>
+
+            Teachers
+
+        </a>
+
+
+        <!-- STAFF -->
+
+        <a
+            href="{{ route('staff.index') }}"
+            class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-person-badge"></i>
+
+            Staff
+
+        </a>
+
+
+        <!-- LEARNERS -->
+
+        <a
+            href="{{ route('learners.index') }}"
+            class="{{ request()->routeIs('learners.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-mortarboard"></i>
+
+            Learners
+
+        </a>
+
+
+        <!-- TRANSACTIONS -->
+
+        <div class="nav-section">
+
+            Transactions
+
+        </div>
+
+
+        <!-- BORROWINGS -->
+
+        <a
+            href="{{ route('borrowings.index') }}"
+            class="{{ request()->routeIs('borrowings.index') || request()->routeIs('borrowings.show') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-arrow-left-right"></i>
+
+            Borrowings
+
+        </a>
+
+
+        <!-- ISSUE BOOK -->
+
+        <a
+            href="{{ route('borrowings.create') }}"
+            class="{{ request()->routeIs('borrowings.create') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-plus-circle"></i>
+
+            Issue Book
+
+        </a>
+
+
+        <!-- REPORTS -->
+
+        <a
+            href="{{ route('reports.index') }}"
+            class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-bar-chart-line"></i>
+
+            Reports
+
+        </a>
+
+
+        <!-- ========================================================= -->
+        <!-- ACCOUNT -->
+        <!-- ========================================================= -->
+
+        <div class="nav-section">
+
+            Account
+
+        </div>
+
+
+        <!-- CHANGE PASSWORD -->
+
+        <a
+            href="{{ route('password.change') }}"
+            class="{{ request()->routeIs('password.change') ? 'active' : '' }}"
+        >
+
+            <i class="bi bi-key-fill"></i>
+
+            Change Password
+
+        </a>
+
 
     </div>
 
 
-    <a
-        href="{{ route('categories.index') }}"
-        class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"
-    >
+    <!-- ========================================================= -->
+    <!-- CURRENT USER -->
+    <!-- ========================================================= -->
 
-        <i class="bi bi-tags"></i>
+    @auth
 
-        Categories
+        <div class="user-account-section">
 
-    </a>
-
-
-    <a
-        href="{{ route('books.index') }}"
-        class="{{ request()->routeIs('books.*') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-book-half"></i>
-
-        Books
-
-    </a>
+            <div class="user-account">
 
 
-    <!-- BORROWERS -->
+                <div class="user-avatar">
 
-    <div class="nav-section">
+                    <i class="bi bi-person-fill"></i>
 
-        Borrowers
-
-    </div>
+                </div>
 
 
-    <a
-        href="{{ route('teachers.index') }}"
-        class="{{ request()->routeIs('teachers.*') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-person-workspace"></i>
-
-        Teachers
-
-    </a>
+                <div class="user-details">
 
 
-    <a
-        href="{{ route('staff.index') }}"
-        class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"
-    >
+                    <div class="user-name">
 
-        <i class="bi bi-person-badge"></i>
+                        {{ auth()->user()->name }}
 
-        Staff
-
-    </a>
+                    </div>
 
 
-    <a
-        href="{{ route('learners.index') }}"
-        class="{{ request()->routeIs('learners.*') ? 'active' : '' }}"
-    >
+                    <div class="user-role">
 
-        <i class="bi bi-mortarboard"></i>
+                        Librarian Account
 
-        Learners
-
-    </a>
+                    </div>
 
 
-    <!-- TRANSACTIONS -->
-
-    <div class="nav-section">
-
-        Transactions
-
-    </div>
+                </div>
 
 
-    <a
-        href="{{ route('borrowings.index') }}"
-        class="{{ request()->routeIs('borrowings.index') || request()->routeIs('borrowings.show') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-arrow-left-right"></i>
-
-        Borrowings
-
-    </a>
+            </div>
 
 
-    <a
-        href="{{ route('borrowings.create') }}"
-        class="{{ request()->routeIs('borrowings.create') ? 'active' : '' }}"
-    >
-
-        <i class="bi bi-plus-circle"></i>
-
-        Issue Book
-
-    </a>
+        </div>
 
 
-    <a
-        href="{{ route('reports.index') }}"
-        class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"
-    >
+        <!-- ========================================================= -->
+        <!-- LOGOUT -->
+        <!-- ========================================================= -->
 
-        <i class="bi bi-bar-chart-line"></i>
+        <div class="logout-section">
 
-        Reports
 
-    </a>
+            <form
+                action="{{ route('logout') }}"
+                method="POST"
+                class="logout-form"
+                onsubmit="return confirm('Are you sure you want to log out?');"
+            >
+
+                @csrf
+
+
+                <button
+                    type="submit"
+                    class="logout-button"
+                >
+
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    Logout
+
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+    @endauth
 
 
 </div>
@@ -1164,6 +1569,8 @@
 
 <div class="content">
 
+
+    <!-- SUCCESS MESSAGE -->
 
     @if(session('success'))
 
@@ -1183,10 +1590,13 @@
                 data-bs-dismiss="alert"
             ></button>
 
+
         </div>
 
     @endif
 
+
+    <!-- ERROR MESSAGE -->
 
     @if(session('error'))
 
@@ -1206,10 +1616,13 @@
                 data-bs-dismiss="alert"
             ></button>
 
+
         </div>
 
     @endif
 
+
+    <!-- PAGE CONTENT -->
 
     @yield('content')
 

@@ -144,22 +144,20 @@ class TeacherController extends Controller
     {
         /*
          * Prevent deletion if the teacher
-         * currently has a borrowed book.
+         * currently has a book that has not been returned.
          */
-        if (
-            $teacher->borrowings()
-                ->whereIn(
-                    'status',
-                    ['borrowed', 'overdue']
-                )
-                ->exists()
-        ) {
+        $hasActiveBorrowings = $teacher->borrowings()
+            ->whereNull('returned_date')
+            ->exists();
+
+
+        if ($hasActiveBorrowings) {
 
             return redirect()
                 ->route('teachers.index')
                 ->with(
                     'error',
-                    'This teacher cannot be deleted because they currently have a borrowed or overdue book.'
+                    'This teacher cannot be deleted because they still have a book that has not been returned.'
                 );
 
         }

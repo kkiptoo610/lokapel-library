@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LearnerController;
@@ -22,599 +23,699 @@ use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard
+| Authentication Routes
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE OVERDUE BORROWINGS AUTOMATICALLY
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Show Login Form
+|--------------------------------------------------------------------------
+*/
 
-    Borrowing::where('status', 'borrowed')
-        ->whereNotNull('due_date')
-        ->whereDate('due_date', '<', Carbon::today())
-        ->update([
-            'status' => 'overdue',
-        ]);
+Route::get(
+    '/login',
+    [AuthController::class, 'showLoginForm']
+)->name('login');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | BOOK STATISTICS
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Process Login
+|--------------------------------------------------------------------------
+*/
 
-    $totalBooks = BookCopy::count();
-
-    $availableBooks = BookCopy::where(
-        'status',
-        'available'
-    )->count();
-
-    $borrowedBooks = BookCopy::where(
-        'status',
-        'borrowed'
-    )->count();
-
-    $damagedBooks = BookCopy::where(
-        'status',
-        'damaged'
-    )->count();
-
-    $overdueBooks = Borrowing::where(
-        'status',
-        'overdue'
-    )->count();
+Route::post(
+    '/login',
+    [AuthController::class, 'login']
+)->name('login.submit');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | PEOPLE STATISTICS
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+*/
 
-    $learnersCount = Learner::count();
+Route::post(
+    '/logout',
+    [AuthController::class, 'logout']
+)->name('logout');
 
-    $teachersCount = Teacher::count();
 
-    $staffCount = Staff::count();
+/*
+|--------------------------------------------------------------------------
+| Protected Library System Routes
+|--------------------------------------------------------------------------
+|
+| Everything inside this group requires a librarian to log in.
+|
+*/
+
+Route::middleware('auth')->group(function () {
 
 
     /*
     |--------------------------------------------------------------------------
-    | TODAY'S ACTIVITY
+    | Password Confirmation
     |--------------------------------------------------------------------------
     */
 
-    $borrowedToday = Borrowing::whereDate(
-        'borrowed_date',
-        Carbon::today()
-    )->count();
+    Route::get(
+        '/confirm-password',
+        [AuthController::class, 'showConfirmPasswordForm']
+    )->name('password.confirm');
 
-    $returnedToday = Borrowing::whereDate(
-        'returned_date',
-        Carbon::today()
-    )->count();
+
+    Route::post(
+        '/confirm-password',
+        [AuthController::class, 'confirmPassword']
+    )->name('password.confirm.submit');
 
 
     /*
     |--------------------------------------------------------------------------
-    | THIS WEEK'S ACTIVITY
+    | Change Password
     |--------------------------------------------------------------------------
     */
 
-    $borrowedThisWeek = Borrowing::whereBetween(
-        'borrowed_date',
-        [
-            Carbon::now()->startOfWeek(),
-            Carbon::now()->endOfWeek(),
-        ]
-    )->count();
+    Route::get(
+        '/change-password',
+        [AuthController::class, 'showChangePasswordForm']
+    )->name('password.change');
+
+
+    Route::post(
+        '/change-password',
+        [AuthController::class, 'changePassword']
+    )->name('password.change.update');
 
 
     /*
     |--------------------------------------------------------------------------
-    | THIS MONTH'S ACTIVITY
+    | Dashboard
     |--------------------------------------------------------------------------
     */
 
-    $borrowedThisMonth = Borrowing::whereMonth(
-        'borrowed_date',
-        Carbon::now()->month
-    )
-        ->whereYear(
+    Route::get('/', function () {
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE OVERDUE BORROWINGS AUTOMATICALLY
+        |--------------------------------------------------------------------------
+        */
+
+        Borrowing::where(
+            'status',
+            'borrowed'
+        )
+            ->whereNotNull('due_date')
+            ->whereDate(
+                'due_date',
+                '<',
+                Carbon::today()
+            )
+            ->update([
+                'status' => 'overdue',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BOOK STATISTICS
+        |--------------------------------------------------------------------------
+        */
+
+        $totalBooks = BookCopy::count();
+
+
+        $availableBooks = BookCopy::where(
+            'status',
+            'available'
+        )->count();
+
+
+        $borrowedBooks = BookCopy::where(
+            'status',
+            'borrowed'
+        )->count();
+
+
+        $damagedBooks = BookCopy::where(
+            'status',
+            'damaged'
+        )->count();
+
+
+        $overdueBooks = Borrowing::where(
+            'status',
+            'overdue'
+        )->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PEOPLE STATISTICS
+        |--------------------------------------------------------------------------
+        */
+
+        $learnersCount = Learner::count();
+
+
+        $teachersCount = Teacher::count();
+
+
+        $staffCount = Staff::count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TODAY'S ACTIVITY
+        |--------------------------------------------------------------------------
+        */
+
+        $borrowedToday = Borrowing::whereDate(
             'borrowed_date',
-            Carbon::now()->year
+            Carbon::today()
+        )->count();
+
+
+        $returnedToday = Borrowing::whereDate(
+            'returned_date',
+            Carbon::today()
+        )->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | THIS WEEK'S ACTIVITY
+        |--------------------------------------------------------------------------
+        */
+
+        $borrowedThisWeek = Borrowing::whereBetween(
+            'borrowed_date',
+            [
+                Carbon::now()->startOfWeek(),
+                Carbon::now()->endOfWeek(),
+            ]
+        )->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | THIS MONTH'S ACTIVITY
+        |--------------------------------------------------------------------------
+        */
+
+        $borrowedThisMonth = Borrowing::whereMonth(
+            'borrowed_date',
+            Carbon::now()->month
         )
-        ->count();
+            ->whereYear(
+                'borrowed_date',
+                Carbon::now()->year
+            )
+            ->count();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | RECENT BORROWING ACTIVITY
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | RECENT BORROWING ACTIVITY
+        |--------------------------------------------------------------------------
+        */
 
-    $recentBorrowings = Borrowing::with([
-        'book',
-        'bookCopy',
-        'borrower',
-    ])
-        ->orderByDesc('borrowed_date')
-        ->orderByDesc('id')
-        ->limit(8)
-        ->get();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | OVERDUE BORROWINGS
-    |--------------------------------------------------------------------------
-    */
-
-    $overdueBorrowings = Borrowing::with([
-        'book',
-        'bookCopy',
-        'borrower',
-    ])
-        ->where('status', 'overdue')
-        ->orderBy('due_date')
-        ->limit(5)
-        ->get();
+        $recentBorrowings = Borrowing::with([
+            'book',
+            'bookCopy',
+            'borrower',
+        ])
+            ->orderByDesc('borrowed_date')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | MOST BORROWED BOOKS
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | OVERDUE BORROWINGS
+        |--------------------------------------------------------------------------
+        */
 
-    $popularBooks = Borrowing::select(
-        'book_id',
-        DB::raw('COUNT(*) as borrowing_count')
-    )
-        ->with('book')
-        ->groupBy('book_id')
-        ->orderByDesc('borrowing_count')
-        ->limit(5)
-        ->get();
+        $overdueBorrowings = Borrowing::with([
+            'book',
+            'bookCopy',
+            'borrower',
+        ])
+            ->where(
+                'status',
+                'overdue'
+            )
+            ->orderBy('due_date')
+            ->limit(5)
+            ->get();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | RETURN DASHBOARD
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | MOST BORROWED BOOKS
+        |--------------------------------------------------------------------------
+        */
 
-    return view(
-        'dashboard',
-        compact(
-            'totalBooks',
-            'availableBooks',
-            'borrowedBooks',
-            'damagedBooks',
-            'overdueBooks',
-            'learnersCount',
-            'teachersCount',
-            'staffCount',
-            'borrowedToday',
-            'returnedToday',
-            'borrowedThisWeek',
-            'borrowedThisMonth',
-            'recentBorrowings',
-            'overdueBorrowings',
-            'popularBooks'
+        $popularBooks = Borrowing::select(
+            'book_id',
+            DB::raw(
+                'COUNT(*) as borrowing_count'
+            )
         )
+            ->with('book')
+            ->groupBy('book_id')
+            ->orderByDesc('borrowing_count')
+            ->limit(5)
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard',
+            compact(
+                'totalBooks',
+                'availableBooks',
+                'borrowedBooks',
+                'damagedBooks',
+                'overdueBooks',
+                'learnersCount',
+                'teachersCount',
+                'staffCount',
+                'borrowedToday',
+                'returnedToday',
+                'borrowedThisWeek',
+                'borrowedThisMonth',
+                'recentBorrowings',
+                'overdueBorrowings',
+                'popularBooks'
+            )
+        );
+
+    })->name('dashboard');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Category Management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'categories',
+        CategoryController::class
     );
 
-})->name('dashboard');
-
-
-/*
-|--------------------------------------------------------------------------
-| Category Management
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    'categories',
-    CategoryController::class
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| Book Management
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    'books',
-    BookController::class
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| Individual Physical Book Copies
-|--------------------------------------------------------------------------
-*/
 
-
-/*
-|--------------------------------------------------------------------------
-| Add Individual Copy
-|--------------------------------------------------------------------------
-*/
-
-Route::post(
-    '/books/{book}/copies',
-    [BookController::class, 'storeCopy']
-)->name('books.copies.store');
+    /*
+    |--------------------------------------------------------------------------
+    | Book Management
+    |--------------------------------------------------------------------------
+    */
 
-
-/*
-|--------------------------------------------------------------------------
-| Update Individual Copy
-|--------------------------------------------------------------------------
-*/
-
-Route::put(
-    '/books/{book}/copies/{copy}',
-    [BookController::class, 'updateCopy']
-)->name('books.copies.update');
+    Route::resource(
+        'books',
+        BookController::class
+    );
 
-
-/*
-|--------------------------------------------------------------------------
-| Delete Individual Copy
-|--------------------------------------------------------------------------
-*/
 
-Route::delete(
-    '/books/{book}/copies/{copy}',
-    [BookController::class, 'destroyCopy']
-)->name('books.copies.destroy');
+    /*
+    |--------------------------------------------------------------------------
+    | Individual Physical Book Copies
+    |--------------------------------------------------------------------------
+    */
 
-
-/*
-|--------------------------------------------------------------------------
-| Book Copies By Status
-|--------------------------------------------------------------------------
-|
-| Dashboard cards can open:
-|
-| /books/status/available
-| /books/status/borrowed
-| /books/status/damaged
-|
-*/
-
-Route::get(
-    '/books/status/{status}',
-    [BookController::class, 'statusList']
-)->name('books.status');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Add Individual Copy
+    |--------------------------------------------------------------------------
+    */
 
-/*
-|--------------------------------------------------------------------------
-| Teacher Management
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    'teachers',
-    TeacherController::class
-);
+    Route::post(
+        '/books/{book}/copies',
+        [BookController::class, 'storeCopy']
+    )->name('books.copies.store');
 
 
-/*
-|--------------------------------------------------------------------------
-| Staff Management
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Update Individual Copy
+    |--------------------------------------------------------------------------
+    */
 
-Route::resource(
-    'staff',
-    StaffController::class
-);
+    Route::put(
+        '/books/{book}/copies/{copy}',
+        [BookController::class, 'updateCopy']
+    )->name('books.copies.update');
 
 
-/*
-|--------------------------------------------------------------------------
-| Learner Import
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Individual Copy
+    |--------------------------------------------------------------------------
+    */
 
-Route::get(
-    '/learners/import',
-    [LearnerController::class, 'showImportForm']
-)->name('learners.import.form');
+    Route::delete(
+        '/books/{book}/copies/{copy}',
+        [BookController::class, 'destroyCopy']
+    )->name('books.copies.destroy');
 
 
-Route::post(
-    '/learners/import',
-    [LearnerController::class, 'import']
-)->name('learners.import');
+    /*
+    |--------------------------------------------------------------------------
+    | Book Copies By Status
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/books/status/{status}',
+        [BookController::class, 'statusList']
+    )->name('books.status');
 
-/*
-|--------------------------------------------------------------------------
-| Download Learner Import Template
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/learners/template/download',
-    [LearnerController::class, 'downloadTemplate']
-)->name('learners.template.download');
+    /*
+    |--------------------------------------------------------------------------
+    | Teacher Management
+    |--------------------------------------------------------------------------
+    */
 
+    Route::resource(
+        'teachers',
+        TeacherController::class
+    );
 
-/*
-|--------------------------------------------------------------------------
-| Learner Management
-|--------------------------------------------------------------------------
-*/
 
-Route::resource(
-    'learners',
-    LearnerController::class
-);
+    /*
+    |--------------------------------------------------------------------------
+    | Staff Management
+    |--------------------------------------------------------------------------
+    */
 
+    Route::resource(
+        'staff',
+        StaffController::class
+    );
 
-/*
-|--------------------------------------------------------------------------
-| Borrowing Management
-|--------------------------------------------------------------------------
-*/
 
+    /*
+    |--------------------------------------------------------------------------
+    | Learner Import
+    |--------------------------------------------------------------------------
+    */
 
-/*
-|--------------------------------------------------------------------------
-| Display All Borrowings
-|--------------------------------------------------------------------------
-*/
+    Route::get(
+        '/learners/import',
+        [LearnerController::class, 'showImportForm']
+    )->name('learners.import.form');
 
-Route::get(
-    '/borrowings',
-    [BorrowingController::class, 'index']
-)->name('borrowings.index');
 
+    Route::post(
+        '/learners/import',
+        [LearnerController::class, 'import']
+    )->name('learners.import');
 
-/*
-|--------------------------------------------------------------------------
-| Issue Book Form
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/borrowings/create',
-    [BorrowingController::class, 'create']
-)->name('borrowings.create');
+    /*
+    |--------------------------------------------------------------------------
+    | Download Learner Import Template
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/learners/template/download',
+        [LearnerController::class, 'downloadTemplate']
+    )->name('learners.template.download');
 
-/*
-|--------------------------------------------------------------------------
-| Store New Borrowing
-|--------------------------------------------------------------------------
-*/
 
-Route::post(
-    '/borrowings',
-    [BorrowingController::class, 'store']
-)->name('borrowings.store');
+    /*
+    |--------------------------------------------------------------------------
+    | Learner Management
+    |--------------------------------------------------------------------------
+    */
 
+    Route::resource(
+        'learners',
+        LearnerController::class
+    );
 
-/*
-|--------------------------------------------------------------------------
-| View Borrowing Record
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/borrowings/{borrowing}',
-    [BorrowingController::class, 'show']
-)->name('borrowings.show');
+    /*
+    |--------------------------------------------------------------------------
+    | Borrowing Management
+    |--------------------------------------------------------------------------
+    */
 
 
-/*
-|--------------------------------------------------------------------------
-| Return Book
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Display All Borrowings
+    |--------------------------------------------------------------------------
+    */
 
-Route::post(
-    '/borrowings/{borrowing}/return',
-    [BorrowingController::class, 'returnBook']
-)->name('borrowings.return');
+    Route::get(
+        '/borrowings',
+        [BorrowingController::class, 'index']
+    )->name('borrowings.index');
 
 
-/*
-|--------------------------------------------------------------------------
-| Reports
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Issue Book Form
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/borrowings/create',
+        [BorrowingController::class, 'create']
+    )->name('borrowings.create');
 
-/*
-|--------------------------------------------------------------------------
-| Reports Dashboard
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports',
-    [ReportController::class, 'index']
-)->name('reports.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Store New Borrowing
+    |--------------------------------------------------------------------------
+    */
 
+    Route::post(
+        '/borrowings',
+        [BorrowingController::class, 'store']
+    )->name('borrowings.store');
 
-/*
-|--------------------------------------------------------------------------
-| General Borrowings Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/borrowings',
-    [ReportController::class, 'borrowings']
-)->name('reports.borrowings');
+    /*
+    |--------------------------------------------------------------------------
+    | View Borrowing Record
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/borrowings/{borrowing}',
+        [BorrowingController::class, 'show']
+    )->name('borrowings.show');
 
-/*
-|--------------------------------------------------------------------------
-| General Borrowings Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/borrowings/preview',
-    [ReportController::class, 'borrowingsPreview']
-)->name('reports.borrowings.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | Return Book
+    |--------------------------------------------------------------------------
+    */
 
+    Route::post(
+        '/borrowings/{borrowing}/return',
+        [BorrowingController::class, 'returnBook']
+    )->name('borrowings.return');
 
-/*
-|--------------------------------------------------------------------------
-| Book Borrowing Details
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/borrowings/book/{book}',
-    [ReportController::class, 'borrowingBookDetails']
-)->name('reports.borrowings.book-details');
+    /*
+    |--------------------------------------------------------------------------
+    | Reports Dashboard
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports',
+        [ReportController::class, 'index']
+    )->name('reports.index');
 
-/*
-|--------------------------------------------------------------------------
-| Overdue Books Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/overdue',
-    [ReportController::class, 'overdue']
-)->name('reports.overdue');
+    /*
+    |--------------------------------------------------------------------------
+    | General Borrowings Report
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/borrowings',
+        [ReportController::class, 'borrowings']
+    )->name('reports.borrowings');
 
-/*
-|--------------------------------------------------------------------------
-| Overdue Books Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/overdue/preview',
-    [ReportController::class, 'overduePreview']
-)->name('reports.overdue.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | General Borrowings Report Preview
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/borrowings/preview',
+        [ReportController::class, 'borrowingsPreview']
+    )->name('reports.borrowings.preview');
 
-/*
-|--------------------------------------------------------------------------
-| Returned Books Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/returned',
-    [ReportController::class, 'returned']
-)->name('reports.returned');
+    /*
+    |--------------------------------------------------------------------------
+    | Book Borrowing Details
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/borrowings/book/{book}',
+        [ReportController::class, 'borrowingBookDetails']
+    )->name('reports.borrowings.book-details');
 
-/*
-|--------------------------------------------------------------------------
-| Returned Books Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/returned/preview',
-    [ReportController::class, 'returnedPreview']
-)->name('reports.returned.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | Overdue Books Report
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/overdue',
+        [ReportController::class, 'overdue']
+    )->name('reports.overdue');
 
-/*
-|--------------------------------------------------------------------------
-| Damaged Books Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/damaged',
-    [ReportController::class, 'damaged']
-)->name('reports.damaged');
+    /*
+    |--------------------------------------------------------------------------
+    | Overdue Books Report Preview
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/overdue/preview',
+        [ReportController::class, 'overduePreview']
+    )->name('reports.overdue.preview');
 
-/*
-|--------------------------------------------------------------------------
-| Damaged Books Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/damaged/preview',
-    [ReportController::class, 'damagedPreview']
-)->name('reports.damaged.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | Returned Books Report
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/returned',
+        [ReportController::class, 'returned']
+    )->name('reports.returned');
 
-/*
-|--------------------------------------------------------------------------
-| Library Inventory Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/inventory',
-    [ReportController::class, 'inventory']
-)->name('reports.inventory');
+    /*
+    |--------------------------------------------------------------------------
+    | Returned Books Report Preview
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/returned/preview',
+        [ReportController::class, 'returnedPreview']
+    )->name('reports.returned.preview');
 
-/*
-|--------------------------------------------------------------------------
-| Library Inventory Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/inventory/preview',
-    [ReportController::class, 'inventoryPreview']
-)->name('reports.inventory.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | Damaged Books Report
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/damaged',
+        [ReportController::class, 'damaged']
+    )->name('reports.damaged');
 
-/*
-|--------------------------------------------------------------------------
-| Most Borrowed Books Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/popular-books',
-    [ReportController::class, 'popularBooks']
-)->name('reports.popular-books');
+    /*
+    |--------------------------------------------------------------------------
+    | Damaged Books Report Preview
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/damaged/preview',
+        [ReportController::class, 'damagedPreview']
+    )->name('reports.damaged.preview');
 
-/*
-|--------------------------------------------------------------------------
-| Borrower Activity Report
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/borrower-activity',
-    [ReportController::class, 'borrowerActivity']
-)->name('reports.borrower-activity');
+    /*
+    |--------------------------------------------------------------------------
+    | Library Inventory Report
+    |--------------------------------------------------------------------------
+    */
 
+    Route::get(
+        '/reports/inventory',
+        [ReportController::class, 'inventory']
+    )->name('reports.inventory');
 
-/*
-|--------------------------------------------------------------------------
-| Borrower Activity Report Preview
-|--------------------------------------------------------------------------
-*/
 
-Route::get(
-    '/reports/borrower-activity/preview',
-    [ReportController::class, 'borrowerActivityPreview']
-)->name('reports.borrower-activity.preview');
+    /*
+    |--------------------------------------------------------------------------
+    | Library Inventory Report Preview
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reports/inventory/preview',
+        [ReportController::class, 'inventoryPreview']
+    )->name('reports.inventory.preview');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Most Borrowed Books Report
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reports/popular-books',
+        [ReportController::class, 'popularBooks']
+    )->name('reports.popular-books');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Borrower Activity Report
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reports/borrower-activity',
+        [ReportController::class, 'borrowerActivity']
+    )->name('reports.borrower-activity');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Borrower Activity Report Preview
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reports/borrower-activity/preview',
+        [ReportController::class, 'borrowerActivityPreview']
+    )->name('reports.borrower-activity.preview');
+
+
+});

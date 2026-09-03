@@ -4,83 +4,57 @@
 
 <div class="learners-page">
 
-
     {{-- ========================================================= --}}
     {{-- PAGE HEADER --}}
     {{-- ========================================================= --}}
 
     <div class="learners-header mb-4">
 
-
         <div class="learners-title-area">
 
-
             <div class="learners-header-icon">
-
                 <i class="bi bi-mortarboard-fill"></i>
-
             </div>
-
 
             <div>
 
                 <h1>
-
                     Learners
-
                 </h1>
 
-
                 <p>
-
                     Manage learners and library borrowers.
-
                 </p>
 
             </div>
 
-
         </div>
-
 
 
         <div class="header-actions">
 
-
             {{-- BATCH UPLOAD --}}
-
             <a
                 href="{{ route('learners.import.form') }}"
                 class="modern-upload-btn"
             >
-
                 <i class="bi bi-file-earmark-arrow-up"></i>
-
                 Batch Upload
-
             </a>
 
 
-
             {{-- ADD LEARNER --}}
-
             <a
                 href="{{ route('learners.create') }}"
                 class="modern-add-btn"
             >
-
                 <i class="bi bi-person-plus-fill"></i>
-
                 Add Learner
-
             </a>
-
 
         </div>
 
-
     </div>
-
 
 
     {{-- ========================================================= --}}
@@ -89,102 +63,64 @@
 
     <div class="row g-4 mb-4">
 
-
         <div class="col-lg-6">
-
 
             <div class="learner-summary-card summary-blue">
 
-
                 <div class="summary-content">
 
-
                     <span>
-
                         Total Learners
-
                     </span>
 
-
                     <h2>
-
                         {{ number_format($learners->count()) }}
-
                     </h2>
 
-
                     <small>
-
                         Learners currently displayed
-
                     </small>
 
-
                 </div>
-
 
                 <div class="summary-icon">
-
                     <i class="bi bi-mortarboard"></i>
-
                 </div>
-
 
             </div>
 
-
         </div>
-
 
 
         <div class="col-lg-6">
 
-
             <div class="learner-summary-card summary-purple">
-
 
                 <div class="summary-content">
 
-
                     <span>
-
                         Library Borrowers
-
                     </span>
 
-
                     <h2>
-
                         {{ number_format($learners->count()) }}
-
                     </h2>
 
-
                     <small>
-
                         Registered learner borrowers
-
                     </small>
 
-
                 </div>
-
 
                 <div class="summary-icon">
-
                     <i class="bi bi-people-fill"></i>
-
                 </div>
-
 
             </div>
 
-
         </div>
 
-
     </div>
-
 
 
     {{-- ========================================================= --}}
@@ -193,53 +129,36 @@
 
     <div class="modern-search-card mb-4">
 
-
         <form method="GET">
-
 
             <div class="search-title">
 
-
                 <div class="search-title-icon">
-
                     <i class="bi bi-search"></i>
-
                 </div>
-
 
                 <div>
 
                     <h5>
-
                         Search Learners
-
                     </h5>
 
-
                     <p>
-
                         Find learners quickly using their details.
-
                     </p>
 
                 </div>
 
-
             </div>
-
 
 
             <div class="row g-3">
 
-
                 <div class="col-lg-10">
-
 
                     <div class="search-input-wrapper">
 
-
                         <i class="bi bi-search"></i>
-
 
                         <input
                             type="text"
@@ -249,393 +168,366 @@
                             placeholder="Search by name, admission number, assessment number, class or stream"
                         >
 
-
                     </div>
-
 
                 </div>
 
 
-
                 <div class="col-lg-2">
-
 
                     <button
                         type="submit"
                         class="btn search-button w-100"
                     >
-
                         <i class="bi bi-search"></i>
-
                         Search
-
                     </button>
-
 
                 </div>
 
-
             </div>
 
-
         </form>
-
 
     </div>
 
 
+    {{-- ========================================================= --}}
+    {{-- GROUP LEARNERS BY GRADE AND STREAM --}}
+    {{-- ========================================================= --}}
+
+    @php
+
+        $groupedLearners = $learners->groupBy(function ($learner) {
+
+            return trim($learner->grade_class) . '|' . trim($learner->stream);
+
+        });
+
+    @endphp
+
 
     {{-- ========================================================= --}}
-    {{-- LEARNERS TABLE --}}
+    {{-- LEARNERS TABLES --}}
     {{-- ========================================================= --}}
 
-    <div class="learners-table-card">
+    @forelse($groupedLearners as $groupName => $groupLearners)
+
+        @php
+
+            $groupParts = explode('|', $groupName);
+
+            $gradeClass = $groupParts[0] ?? 'Unassigned';
+
+            $stream = $groupParts[1] ?? 'Unassigned';
+
+        @endphp
 
 
-        {{-- TABLE HEADER --}}
+        <div class="learners-table-card mb-4">
 
-        <div class="table-header">
+            {{-- TABLE HEADER --}}
+
+            <div class="table-header">
+
+                <div>
+
+                    <h4>
+
+                        <i class="bi bi-mortarboard-fill"></i>
+
+                        {{ $gradeClass }}
+
+                        -
+
+                        {{ $stream }}
+
+                    </h4>
+
+                    <p>
+
+                        Learners registered in
+
+                        {{ $gradeClass }}
+
+                        {{ $stream }}
+
+                        stream.
+
+                    </p>
+
+                </div>
 
 
-            <div>
+                <div class="learner-count">
 
+                    <i class="bi bi-people"></i>
 
-                <h4>
+                    {{ number_format($groupLearners->count()) }}
 
-                    <i class="bi bi-people-fill"></i>
+                    Learners
 
-                    All Learners
-
-                </h4>
-
-
-                <p>
-
-                    View and manage registered library learners.
-
-                </p>
-
+                </div>
 
             </div>
 
 
-            <div class="learner-count">
+            <div class="table-responsive">
 
-                <i class="bi bi-people"></i>
+                <table class="table learners-table align-middle mb-0">
 
-                {{ number_format($learners->count()) }}
-
-                Learners
-
-            </div>
-
-
-        </div>
-
-
-
-        <div class="table-responsive">
-
-
-            <table class="table learners-table align-middle mb-0">
-
-
-                <thead>
-
-
-                    <tr>
-
-
-                        <th>
-
-                            #
-
-                        </th>
-
-
-                        <th>
-
-                            Learner
-
-                        </th>
-
-
-                        <th>
-
-                            Admission No.
-
-                        </th>
-
-
-                        <th>
-
-                            Assessment No.
-
-                        </th>
-
-
-                        <th>
-
-                            Class
-
-                        </th>
-
-
-                        <th>
-
-                            Stream
-
-                        </th>
-
-
-                        <th class="text-end">
-
-                            Actions
-
-                        </th>
-
-
-                    </tr>
-
-
-                </thead>
-
-
-
-                <tbody>
-
-
-                    @forelse($learners as $learner)
-
+                    <thead>
 
                         <tr>
 
-
-                            {{-- NUMBER --}}
-
-                            <td>
-
-
-                                <div class="learner-number">
-
-                                    {{ $loop->iteration }}
-
-                                </div>
-
-
-                            </td>
-
-
-
-                            {{-- LEARNER NAME --}}
-
-                            <td>
-
-
-                                <div class="learner-profile">
-
-
-                                    <div class="learner-avatar">
-
-                                        <i class="bi bi-person-fill"></i>
-
-                                    </div>
-
-
-                                    <div>
-
-
-                                        <strong>
-
-                                            {{ $learner->name }}
-
-                                        </strong>
-
-
-                                        <small>
-
-                                            Library Learner
-
-                                        </small>
-
-
-                                    </div>
-
-
-                                </div>
-
-
-                            </td>
-
-
-
-                            {{-- ADMISSION NUMBER --}}
-
-                            <td>
-
-
-                                <span class="admission-number">
-
-                                    <i class="bi bi-card-heading"></i>
-
-                                    {{ $learner->admission_number }}
-
-                                </span>
-
-
-                            </td>
-
-
-
-                            {{-- ASSESSMENT NUMBER --}}
-
-                            <td>
-
-
-                                @if($learner->assessment_number)
-
-
-                                    <span class="assessment-number">
-
-                                        {{ $learner->assessment_number }}
-
-                                    </span>
-
-
-                                @else
-
-
-                                    <span class="missing-value">
-
-                                        Not provided
-
-                                    </span>
-
-
-                                @endif
-
-
-                            </td>
-
-
-
-                            {{-- CLASS --}}
-
-                            <td>
-
-
-                                <span class="class-badge">
-
-                                    <i class="bi bi-building"></i>
-
-                                    {{ $learner->grade_class }}
-
-                                </span>
-
-
-                            </td>
-
-
-
-                            {{-- STREAM --}}
-
-                            <td>
-
-
-                                <span class="stream-badge">
-
-                                    {{ $learner->stream }}
-
-                                </span>
-
-
-                            </td>
-
-
-
-                            {{-- ACTIONS --}}
-
-                            <td class="text-end">
-
-
-                                {{-- VIEW --}}
-
-                                <a
-                                    href="{{ route('learners.show', $learner) }}"
-                                    class="learner-action action-view"
-                                    title="View Learner"
-                                >
-
-                                    <i class="bi bi-eye-fill"></i>
-
-                                </a>
-
-
-
-                                {{-- EDIT --}}
-
-                                <a
-                                    href="{{ route('learners.edit', $learner) }}"
-                                    class="learner-action action-edit"
-                                    title="Edit Learner"
-                                >
-
-                                    <i class="bi bi-pencil-square"></i>
-
-                                </a>
-
-
-
-                                {{-- DELETE --}}
-
-                                <form
-                                    action="{{ route('learners.destroy', $learner) }}"
-                                    method="POST"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Are you sure you want to delete this learner?')"
-                                >
-
-
-                                    @csrf
-
-
-                                    @method('DELETE')
-
-
-                                    <button
-                                        type="submit"
-                                        class="learner-action action-delete"
-                                        title="Delete Learner"
-                                    >
-
-                                        <i class="bi bi-trash-fill"></i>
-
-                                    </button>
-
-
-                                </form>
-
-
-                            </td>
-
+                            <th>
+                                #
+                            </th>
+
+                            <th>
+                                Learner
+                            </th>
+
+                            <th>
+                                Admission No.
+                            </th>
+
+                            <th>
+                                Assessment No.
+                            </th>
+
+                            <th>
+                                Class
+                            </th>
+
+                            <th>
+                                Stream
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
 
                         </tr>
 
+                    </thead>
 
-                    @empty
 
+                    <tbody>
+
+                        @foreach($groupLearners as $learner)
+
+                            <tr>
+
+                                {{-- NUMBER --}}
+
+                                <td>
+
+                                    <div class="learner-number">
+
+                                        {{ $loop->iteration }}
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- LEARNER NAME --}}
+
+                                <td>
+
+                                    <div class="learner-profile">
+
+                                        <div class="learner-avatar">
+
+                                            <i class="bi bi-person-fill"></i>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <strong>
+
+                                                {{ $learner->name }}
+
+                                            </strong>
+
+
+                                            <small>
+
+                                                Library Learner
+
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- ADMISSION NUMBER --}}
+
+                                <td>
+
+                                    <span class="admission-number">
+
+                                        <i class="bi bi-card-heading"></i>
+
+                                        {{ $learner->admission_number }}
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- ASSESSMENT NUMBER --}}
+
+                                <td>
+
+                                    @if($learner->assessment_number)
+
+                                        <span class="assessment-number">
+
+                                            {{ $learner->assessment_number }}
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="missing-value">
+
+                                            Not provided
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- CLASS --}}
+
+                                <td>
+
+                                    <span class="class-badge">
+
+                                        <i class="bi bi-building"></i>
+
+                                        {{ $learner->grade_class }}
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- STREAM --}}
+
+                                <td>
+
+                                    <span class="stream-badge">
+
+                                        {{ $learner->stream }}
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- ACTIONS --}}
+
+                                <td class="text-end">
+
+                                    {{-- VIEW --}}
+
+                                    <a
+                                        href="{{ route('learners.show', $learner) }}"
+                                        class="learner-action action-view"
+                                        title="View Learner"
+                                    >
+
+                                        <i class="bi bi-eye-fill"></i>
+
+                                    </a>
+
+
+                                    {{-- EDIT --}}
+
+                                    <a
+                                        href="{{ route('learners.edit', $learner) }}"
+                                        class="learner-action action-edit"
+                                        title="Edit Learner"
+                                    >
+
+                                        <i class="bi bi-pencil-square"></i>
+
+                                    </a>
+
+
+                                    {{-- DELETE --}}
+
+                                    <form
+                                        action="{{ route('learners.destroy', $learner) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this learner?')"
+                                    >
+
+                                        @csrf
+
+                                        @method('DELETE')
+
+
+                                        <button
+                                            type="submit"
+                                            class="learner-action action-delete"
+                                            title="Delete Learner"
+                                        >
+
+                                            <i class="bi bi-trash-fill"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    @empty
+
+
+        {{-- ========================================================= --}}
+        {{-- EMPTY STATE --}}
+        {{-- ========================================================= --}}
+
+        <div class="learners-table-card">
+
+            <div class="table-responsive">
+
+                <table class="table learners-table align-middle mb-0">
+
+                    <tbody>
 
                         <tr>
-
 
                             <td
                                 colspan="7"
                                 class="empty-learners-cell"
                             >
 
-
                                 <div class="empty-learners-state">
-
 
                                     <div class="empty-learners-icon">
 
@@ -661,7 +553,6 @@
 
                                     <div class="empty-actions">
 
-
                                         <a
                                             href="{{ route('learners.create') }}"
                                             class="btn btn-primary"
@@ -685,36 +576,26 @@
 
                                         </a>
 
-
                                     </div>
-
 
                                 </div>
 
-
                             </td>
-
 
                         </tr>
 
+                    </tbody>
 
-                    @endforelse
+                </table>
 
-
-                </tbody>
-
-
-            </table>
-
+            </div>
 
         </div>
 
-
-    </div>
+    @endforelse
 
 
 </div>
-
 
 
 {{-- ========================================================= --}}
@@ -733,7 +614,6 @@
     padding-bottom: 30px;
 
 }
-
 
 
 /* ========================================================= */
@@ -755,20 +635,31 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #0f3d6e,
+
             #1558a6,
+
             #2575d7
+
         );
 
     box-shadow:
 
         0 12px 30px
+
         rgba(
+
             21,
+
             88,
+
             166,
+
             0.20
+
         );
 
 }
@@ -806,10 +697,15 @@
     background:
 
         rgba(
+
             255,
+
             255,
+
             255,
+
             0.18
+
         );
 
 }
@@ -835,14 +731,18 @@
     color:
 
         rgba(
+
             255,
+
             255,
+
             255,
+
             0.82
+
         );
 
 }
-
 
 
 /* ========================================================= */
@@ -873,25 +773,37 @@
     background:
 
         rgba(
+
             255,
+
             255,
+
             255,
+
             0.15
+
         );
 
     border:
 
         1px solid
+
         rgba(
+
             255,
+
             255,
+
             255,
+
             0.25
+
         );
 
     transition:
 
         transform 0.2s ease,
+
         background 0.2s ease;
 
 }
@@ -908,10 +820,15 @@
     background:
 
         rgba(
+
             255,
+
             255,
+
             255,
+
             0.25
+
         );
 
 }
@@ -934,6 +851,7 @@
     transition:
 
         transform 0.2s ease,
+
         box-shadow 0.2s ease;
 
 }
@@ -950,15 +868,20 @@
     box-shadow:
 
         0 8px 20px
+
         rgba(
+
             0,
+
             0,
+
             0,
+
             0.15
+
         );
 
 }
-
 
 
 /* ========================================================= */
@@ -986,6 +909,7 @@
     transition:
 
         transform 0.25s ease,
+
         box-shadow 0.25s ease;
 
 }
@@ -1000,11 +924,17 @@
     box-shadow:
 
         0 16px 32px
+
         rgba(
+
             0,
+
             0,
+
             0,
+
             0.15
+
         );
 
 }
@@ -1015,9 +945,13 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #1769e0,
+
             #3f8cff
+
         );
 
 }
@@ -1028,9 +962,13 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #6d28d9,
+
             #a855f7
+
         );
 
 }
@@ -1074,7 +1012,6 @@
 }
 
 
-
 /* ========================================================= */
 /* SEARCH CARD */
 /* ========================================================= */
@@ -1090,11 +1027,17 @@
     box-shadow:
 
         0 6px 25px
+
         rgba(
+
             0,
+
             0,
+
             0,
+
             0.06
+
         );
 
 }
@@ -1204,11 +1147,17 @@
     box-shadow:
 
         0 0 0 0.2rem
+
         rgba(
+
             37,
+
             117,
+
             215,
+
             0.12
+
         );
 
 }
@@ -1227,9 +1176,13 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #1769e0,
+
             #2575d7
+
         );
 
     border: none;
@@ -1244,13 +1197,16 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #1558a6,
+
             #1769e0
+
         );
 
 }
-
 
 
 /* ========================================================= */
@@ -1268,15 +1224,20 @@
     box-shadow:
 
         0 8px 25px
+
         rgba(
+
             0,
+
             0,
+
             0,
+
             0.06
+
         );
 
 }
-
 
 
 /* ========================================================= */
@@ -1356,7 +1317,6 @@
 }
 
 
-
 /* ========================================================= */
 /* TABLE */
 /* ========================================================= */
@@ -1412,7 +1372,6 @@
 }
 
 
-
 /* ========================================================= */
 /* NUMBER */
 /* ========================================================= */
@@ -1440,7 +1399,6 @@
     font-weight: 600;
 
 }
-
 
 
 /* ========================================================= */
@@ -1475,9 +1433,13 @@
     background:
 
         linear-gradient(
+
             135deg,
+
             #e7f0ff,
+
             #dbeafe
+
         );
 
     color: #1769e0;
@@ -1509,7 +1471,6 @@
 }
 
 
-
 /* ========================================================= */
 /* ADMISSION NUMBER */
 /* ========================================================= */
@@ -1536,7 +1497,6 @@
 }
 
 
-
 /* ========================================================= */
 /* ASSESSMENT NUMBER */
 /* ========================================================= */
@@ -1557,7 +1517,6 @@
     font-style: italic;
 
 }
-
 
 
 /* ========================================================= */
@@ -1610,7 +1569,6 @@
 }
 
 
-
 /* ========================================================= */
 /* ACTION BUTTONS */
 /* ========================================================= */
@@ -1638,6 +1596,7 @@
     transition:
 
         transform 0.2s ease,
+
         box-shadow 0.2s ease;
 
 }
@@ -1704,7 +1663,6 @@
     color: #b91c1c;
 
 }
-
 
 
 /* ========================================================= */
@@ -1783,13 +1741,11 @@
 }
 
 
-
 /* ========================================================= */
 /* RESPONSIVE */
 /* ========================================================= */
 
 @media (max-width: 768px) {
-
 
     .learners-header {
 
@@ -1812,6 +1768,7 @@
 
 
     .modern-upload-btn,
+
     .modern-add-btn {
 
         width: 100%;
@@ -1846,7 +1803,6 @@
         flex-direction: column;
 
     }
-
 
 }
 
