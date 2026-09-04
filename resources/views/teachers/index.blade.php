@@ -252,6 +252,8 @@
         border-bottom:
             1px solid #e5d6c3;
 
+        white-space: nowrap;
+
     }
 
 
@@ -310,6 +312,8 @@
 
         margin-right: 12px;
 
+        flex-shrink: 0;
+
     }
 
 
@@ -330,6 +334,71 @@
         border-radius: 8px;
 
         font-weight: 500;
+
+        white-space: nowrap;
+
+    }
+
+
+    /* =====================================
+       DEPARTMENT BADGE
+    ===================================== */
+
+    .department-badge {
+
+        display: inline-block;
+
+        background-color: #f7f1e3;
+
+        color: #6f4e37;
+
+        border: 1px solid #e5d6c3;
+
+        padding: 7px 12px;
+
+        border-radius: 8px;
+
+        font-weight: 500;
+
+        white-space: nowrap;
+
+    }
+
+
+    /* =====================================
+       POSITION BADGE
+    ===================================== */
+
+    .position-badge {
+
+        display: inline-block;
+
+        background-color: #f7ead9;
+
+        color: #8b5e3c;
+
+        border: 1px solid #e5d6c3;
+
+        padding: 7px 12px;
+
+        border-radius: 8px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+    }
+
+
+    /* =====================================
+       EMPTY VALUE
+    ===================================== */
+
+    .empty-value {
+
+        color: #a08c78;
+
+        font-style: italic;
 
     }
 
@@ -536,7 +605,7 @@
                                 name="search"
                                 class="form-control search-input border-start-0"
                                 value="{{ request('search') }}"
-                                placeholder="Search by teacher name or phone number"
+                                placeholder="Search by teacher name, phone number, department or position"
                             >
 
 
@@ -613,6 +682,20 @@
                             <th>
 
                                 Phone Number
+
+                            </th>
+
+
+                            <th>
+
+                                Department
+
+                            </th>
+
+
+                            <th>
+
+                                Position / Designation
 
                             </th>
 
@@ -695,13 +778,83 @@
                                 <td>
 
 
-                                    <span class="phone-badge">
+                                    @if($teacher->phone)
 
-                                        <i class="bi bi-telephone me-1"></i>
+                                        <span class="phone-badge">
 
-                                        {{ $teacher->phone }}
+                                            <i class="bi bi-telephone me-1"></i>
 
-                                    </span>
+                                            {{ $teacher->phone }}
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="empty-value">
+
+                                            Not provided
+
+                                        </span>
+
+                                    @endif
+
+
+                                </td>
+
+
+                                {{-- DEPARTMENT --}}
+
+                                <td>
+
+
+                                    @if($teacher->department)
+
+                                        <span class="department-badge">
+
+                                            <i class="bi bi-building me-1"></i>
+
+                                            {{ $teacher->department }}
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="empty-value">
+
+                                            Not assigned
+
+                                        </span>
+
+                                    @endif
+
+
+                                </td>
+
+
+                                {{-- POSITION --}}
+
+                                <td>
+
+
+                                    @if($teacher->position)
+
+                                        <span class="position-badge">
+
+                                            <i class="bi bi-person-badge me-1"></i>
+
+                                            {{ $teacher->position }}
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="empty-value">
+
+                                            Teacher
+
+                                        </span>
+
+                                    @endif
 
 
                                 </td>
@@ -781,7 +934,7 @@
 
 
                                 <td
-                                    colspan="4"
+                                    colspan="6"
                                 >
 
 

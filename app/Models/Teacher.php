@@ -12,6 +12,8 @@ class Teacher extends Model
     protected $fillable = [
         'name',
         'phone',
+        'department',
+        'position',
     ];
 
     /**
@@ -19,6 +21,9 @@ class Teacher extends Model
      */
     public function borrowings()
     {
-        return $this->morphMany(Borrowing::class, 'borrower');
+        return $this->morphMany(
+            Borrowing::class,
+            'borrower'
+        );
     }
 }

@@ -15,11 +15,14 @@ class TeacherController extends Controller
         $query = Teacher::query();
 
         /*
-         * Search teachers by name or phone number.
+         * Search teachers by name, phone number,
+         * department, or position.
          */
         if ($request->filled('search')) {
 
-            $search = $request->search;
+            $search = trim(
+                (string) $request->search
+            );
 
             $query->where(function ($q) use ($search) {
 
@@ -30,6 +33,16 @@ class TeacherController extends Controller
                 )
                 ->orWhere(
                     'phone',
+                    'like',
+                    "%{$search}%"
+                )
+                ->orWhere(
+                    'department',
+                    'like',
+                    "%{$search}%"
+                )
+                ->orWhere(
+                    'position',
                     'like',
                     "%{$search}%"
                 );
@@ -53,7 +66,9 @@ class TeacherController extends Controller
      */
     public function create()
     {
-        return view('teachers.create');
+        return view(
+            'teachers.create'
+        );
     }
 
 
@@ -64,18 +79,42 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
 
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
-            'phone' => 'required|string|max:30',
+            'phone' => [
+                'required',
+                'string',
+                'max:30',
+            ],
+
+            'department' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'position' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
         ]);
 
 
-        Teacher::create($validated);
+        Teacher::create(
+            $validated
+        );
 
 
         return redirect()
-            ->route('teachers.index')
+            ->route(
+                'teachers.index'
+            )
             ->with(
                 'success',
                 'Teacher added successfully.'
@@ -88,11 +127,15 @@ class TeacherController extends Controller
      */
     public function show(Teacher $teacher)
     {
-        $teacher->load('borrowings');
+        $teacher->load(
+            'borrowings'
+        );
 
         return view(
             'teachers.show',
-            compact('teacher')
+            compact(
+                'teacher'
+            )
         );
     }
 
@@ -104,7 +147,9 @@ class TeacherController extends Controller
     {
         return view(
             'teachers.edit',
-            compact('teacher')
+            compact(
+                'teacher'
+            )
         );
     }
 
@@ -118,18 +163,42 @@ class TeacherController extends Controller
     ) {
         $validated = $request->validate([
 
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
-            'phone' => 'required|string|max:30',
+            'phone' => [
+                'required',
+                'string',
+                'max:30',
+            ],
+
+            'department' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'position' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
         ]);
 
 
-        $teacher->update($validated);
+        $teacher->update(
+            $validated
+        );
 
 
         return redirect()
-            ->route('teachers.index')
+            ->route(
+                'teachers.index'
+            )
             ->with(
                 'success',
                 'Teacher updated successfully.'
@@ -146,15 +215,20 @@ class TeacherController extends Controller
          * Prevent deletion if the teacher
          * currently has a book that has not been returned.
          */
-        $hasActiveBorrowings = $teacher->borrowings()
-            ->whereNull('returned_date')
+        $hasActiveBorrowings = $teacher
+            ->borrowings()
+            ->whereNull(
+                'returned_date'
+            )
             ->exists();
 
 
         if ($hasActiveBorrowings) {
 
             return redirect()
-                ->route('teachers.index')
+                ->route(
+                    'teachers.index'
+                )
                 ->with(
                     'error',
                     'This teacher cannot be deleted because they still have a book that has not been returned.'
@@ -167,7 +241,9 @@ class TeacherController extends Controller
 
 
         return redirect()
-            ->route('teachers.index')
+            ->route(
+                'teachers.index'
+            )
             ->with(
                 'success',
                 'Teacher deleted successfully.'
