@@ -11,42 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table(
-            'books',
-            function (Blueprint $table) {
-
-                $table->foreign(
-                    'subcategory_id'
-                )
-                ->references(
-                    'id'
-                )
-                ->on(
-                    'subcategories'
-                )
+        Schema::table('books', function (Blueprint $table) {
+            $table->foreignId('subcategory_id')
+                ->nullable()
+                ->constrained('subcategories')
                 ->nullOnDelete();
-
-            }
-        );
+        });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table(
-            'books',
-            function (Blueprint $table) {
-
-                $table->dropForeign(
-                    [
-                        'subcategory_id',
-                    ]
-                );
-
-            }
-        );
+        Schema::table('books', function (Blueprint $table) {
+            $table->dropForeign(['subcategory_id']);
+            $table->dropColumn('subcategory_id');
+        });
     }
 };
