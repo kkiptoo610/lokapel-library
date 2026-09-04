@@ -588,6 +588,37 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | CLASS BORROWING REPORT
+    |--------------------------------------------------------------------------
+    |
+    | Displays borrowing records for learners grouped or filtered
+    | according to their class, for example Grade 10 West.
+    |
+    */
+
+    Route::get(
+        '/reports/class-borrowing',
+        [ReportController::class, 'classBorrowing']
+    )->name('reports.class-borrowing');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLASS BORROWING REPORT PREVIEW / PRINT
+    |--------------------------------------------------------------------------
+    |
+    | Used later for a clean printable version of a selected class report.
+    |
+    */
+
+    Route::get(
+        '/reports/class-borrowing/preview',
+        [ReportController::class, 'classBorrowingPreview']
+    )->name('reports.class-borrowing.preview');
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Overdue Books Report
     |--------------------------------------------------------------------------
     */

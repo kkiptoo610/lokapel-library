@@ -17,7 +17,12 @@
 </div>
 
 
+<!-- REPORT STATISTICS -->
+
 <div class="row g-4 mb-4">
+
+
+    <!-- TOTAL PHYSICAL COPIES -->
 
     <div class="col-md-3">
 
@@ -40,6 +45,8 @@
     </div>
 
 
+    <!-- AVAILABLE COPIES -->
+
     <div class="col-md-3">
 
         <div class="card shadow-sm h-100">
@@ -60,6 +67,8 @@
 
     </div>
 
+
+    <!-- CURRENTLY BORROWED -->
 
     <div class="col-md-3">
 
@@ -82,6 +91,8 @@
     </div>
 
 
+    <!-- OVERDUE BOOKS -->
+
     <div class="col-md-3">
 
         <div class="card shadow-sm h-100">
@@ -102,11 +113,16 @@
 
     </div>
 
+
 </div>
 
 
+<!-- REPORT CARDS -->
+
 <div class="row g-4">
 
+
+    <!-- BORROWING REPORT -->
 
     <div class="col-lg-4">
 
@@ -120,13 +136,18 @@
                 <div class="card-body">
 
                     <h5>
+
                         <i class="bi bi-journal-text"></i>
+
                         Borrowing Report
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         View all borrowing records and filter by date,
                         status and borrower type.
+
                     </p>
 
                 </div>
@@ -137,6 +158,8 @@
 
     </div>
 
+
+    <!-- OVERDUE BOOKS -->
 
     <div class="col-lg-4">
 
@@ -150,12 +173,17 @@
                 <div class="card-body">
 
                     <h5 class="text-danger">
+
                         <i class="bi bi-exclamation-triangle"></i>
+
                         Overdue Books
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         Track books that have passed their return date.
+
                     </p>
 
                 </div>
@@ -166,6 +194,8 @@
 
     </div>
 
+
+    <!-- RETURNED BOOKS -->
 
     <div class="col-lg-4">
 
@@ -179,12 +209,17 @@
                 <div class="card-body">
 
                     <h5>
+
                         <i class="bi bi-check-circle"></i>
+
                         Returned Books
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         View all returned books and return dates.
+
                     </p>
 
                 </div>
@@ -195,6 +230,8 @@
 
     </div>
 
+
+    <!-- INVENTORY REPORT -->
 
     <div class="col-lg-4">
 
@@ -208,12 +245,17 @@
                 <div class="card-body">
 
                     <h5>
+
                         <i class="bi bi-bookshelf"></i>
+
                         Inventory Report
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         View all books and individual physical copies.
+
                     </p>
 
                 </div>
@@ -224,6 +266,8 @@
 
     </div>
 
+
+    <!-- MOST BORROWED BOOKS -->
 
     <div class="col-lg-4">
 
@@ -237,12 +281,17 @@
                 <div class="card-body">
 
                     <h5>
+
                         <i class="bi bi-bar-chart"></i>
+
                         Most Borrowed Books
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         Identify the most frequently borrowed books.
+
                     </p>
 
                 </div>
@@ -253,6 +302,8 @@
 
     </div>
 
+
+    <!-- BORROWER ACTIVITY -->
 
     <div class="col-lg-4">
 
@@ -266,13 +317,56 @@
                 <div class="card-body">
 
                     <h5>
+
                         <i class="bi bi-person-lines-fill"></i>
+
                         Borrower Activity
+
                     </h5>
 
                     <p class="text-muted mb-0">
+
                         View borrowing history for learners,
                         teachers and staff.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- CLASS BORROWING REPORT -->
+
+    <div class="col-lg-4">
+
+        <a
+            href="{{ route('reports.class-borrowing') }}"
+            class="text-decoration-none"
+        >
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5>
+
+                        <i class="bi bi-mortarboard-fill"></i>
+
+                        Class Borrowing Report
+
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        Generate a borrowing report for a specific class,
+                        such as Grade 10 West, including books currently
+                        borrowed and optionally returned books.
+
                     </p>
 
                 </div>

@@ -2017,7 +2017,7 @@ class ReportController extends Controller
         }
 
 
-        $damagedCopies =
+        $copies =
             $query
                 ->orderBy(
                     'accession_number'
@@ -2054,9 +2054,14 @@ class ReportController extends Controller
             ->get();
 
 
+        // The damaged-books Blade view uses $damagedCopies.
+        // Keep $copies too for backward compatibility with any other code.
+        $damagedCopies = $copies;
+
         return view(
             'reports.damaged-books',
             compact(
+                'copies',
                 'damagedCopies',
                 'categories',
                 'subcategories'
@@ -2746,6 +2751,750 @@ class ReportController extends Controller
                 'borrowings',
                 'borrowerType',
                 'reportDate'
+            )
+        );
+
+    }
+
+
+
+
+    
+    /**
+     * --------------------------------------------------------------
+     * CLASS BORROWING REPORT
+     * --------------------------------------------------------------
+     */
+    public function classBorrowing(
+        Request $request
+    ) {
+
+        $this->updateOverdueBorrowings();
+
+
+        $classes =
+            Learner::query()
+                ->select(
+                    'grade_class',
+                    'stream'
+                )
+                ->whereNotNull(
+                    'grade_class'
+                )
+                ->where(
+                    'grade_class',
+                    '!=',
+                    ''
+                )
+                ->whereNotNull(
+                    'stream'
+                )
+                ->where(
+                    'stream',
+                    '!=',
+                    ''
+                )
+                ->distinct()
+                ->orderBy(
+                    'grade_class'
+                )
+                ->orderBy(
+                    'stream'
+                )
+                ->get();
+
+
+        $borrowings =
+            collect();
+
+
+        $selectedClass =
+            null;
+
+
+        $gradeClass =
+            null;
+
+
+        $stream =
+            null;
+
+
+        $classValue =
+            $request->input(
+                'class'
+            );
+
+
+        if (
+            is_string(
+                $classValue
+            )
+            &&
+            $classValue !== ''
+        ) {
+
+            $decodedClass =
+                json_decode(
+                    $classValue,
+                    true
+                );
+
+
+            if (
+                is_array(
+                    $decodedClass
+                )
+            ) {
+
+                $gradeClass =
+                    trim(
+                        (string) (
+                            $decodedClass['grade_class']
+                            ?? ''
+                        )
+                    );
+
+
+                $stream =
+                    trim(
+                        (string) (
+                            $decodedClass['stream']
+                            ?? ''
+                        )
+                    );
+
+            }
+
+        }
+
+
+        if (
+            !$gradeClass
+            &&
+            $request->filled(
+                'grade_class'
+            )
+        ) {
+
+            $gradeClass =
+                trim(
+                    (string) $request->input(
+                        'grade_class'
+                    )
+                );
+
+        }
+
+
+        if (
+            !$stream
+            &&
+            $request->filled(
+                'stream'
+            )
+        ) {
+
+            $stream =
+                trim(
+                    (string) $request->input(
+                        'stream'
+                    )
+                );
+
+        }
+
+
+        if (
+            $gradeClass !== ''
+            &&
+            $stream !== ''
+        ) {
+
+            $selectedClass =
+                trim(
+                    $gradeClass
+                    . ' '
+                    . $stream
+                );
+
+
+            $query =
+                Borrowing::with([
+                    'book',
+                    'bookCopy',
+                    'borrower',
+                ])
+                ->where(
+                    'borrower_type',
+                    Learner::class
+                );
+
+
+            $query->whereHasMorph(
+                'borrower',
+                [
+                    Learner::class,
+                ],
+                function (
+                    $learnerQuery
+                ) use (
+                    $gradeClass,
+                    $stream
+                ) {
+
+                    $learnerQuery
+                        ->where(
+                            'grade_class',
+                            $gradeClass
+                        )
+                        ->where(
+                            'stream',
+                            $stream
+                        );
+
+                }
+            );
+
+
+            if (
+                $request->filled(
+                    'status'
+                )
+            ) {
+
+                $query->where(
+                    'status',
+                    $request->input(
+                        'status'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'from_date'
+                )
+            ) {
+
+                $query->whereDate(
+                    'borrowed_date',
+                    '>=',
+                    $request->input(
+                        'from_date'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'to_date'
+                )
+            ) {
+
+                $query->whereDate(
+                    'borrowed_date',
+                    '<=',
+                    $request->input(
+                        'to_date'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'search'
+                )
+            ) {
+
+                $search =
+                    trim(
+                        (string) $request->input(
+                            'search'
+                        )
+                    );
+
+
+                $query->where(
+                    function (
+                        $searchQuery
+                    ) use (
+                        $search
+                    ) {
+
+                        $searchQuery->whereHasMorph(
+                            'borrower',
+                            [
+                                Learner::class,
+                            ],
+                            function (
+                                $learnerQuery
+                            ) use (
+                                $search
+                            ) {
+
+                                $learnerQuery
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'admission_number',
+                                        'like',
+                                        '%' . $search . '%'
+                                    );
+
+                            }
+                        );
+
+
+                        $searchQuery->orWhereHas(
+                            'book',
+                            function (
+                                $bookQuery
+                            ) use (
+                                $search
+                            ) {
+
+                                $bookQuery
+                                    ->where(
+                                        'title',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'author',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'book_code',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'isbn',
+                                        'like',
+                                        '%' . $search . '%'
+                                    );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+
+
+            $borrowings =
+                $query
+                    ->orderByDesc(
+                        'borrowed_date'
+                    )
+                    ->orderByDesc(
+                        'id'
+                    )
+                    ->get();
+
+        }
+
+
+        $totalRecords =
+            $borrowings
+                ->count();
+
+
+        $totalLearners =
+            $borrowings
+                ->map(
+                    function (
+                        $borrowing
+                    ) {
+
+                        return
+                            $borrowing->borrower_id;
+
+                    }
+                )
+                ->unique()
+                ->count();
+
+
+        $currentlyBorrowed =
+            $borrowings
+                ->whereIn(
+                    'status',
+                    [
+                        'borrowed',
+                        'overdue',
+                    ]
+                )
+                ->count();
+
+
+        $returnedCount =
+            $borrowings
+                ->where(
+                    'status',
+                    'returned'
+                )
+                ->count();
+
+
+        return view(
+            'reports.class-borrowing',
+            compact(
+                'classes',
+                'selectedClass',
+                'gradeClass',
+                'stream',
+                'borrowings',
+                'totalRecords',
+                'totalLearners',
+                'currentlyBorrowed',
+                'returnedCount'
+            )
+        );
+
+    }
+
+
+
+    /**
+     * --------------------------------------------------------------
+     * CLASS BORROWING REPORT PRINT PREVIEW
+     * --------------------------------------------------------------
+     */
+    public function classBorrowingPreview(
+        Request $request
+    ) {
+
+        $this->updateOverdueBorrowings();
+
+
+        $borrowings =
+            collect();
+
+
+        $selectedClass =
+            null;
+
+
+        $gradeClass =
+            null;
+
+
+        $stream =
+            null;
+
+
+        $classValue =
+            $request->input(
+                'class'
+            );
+
+
+        if (
+            is_string(
+                $classValue
+            )
+            &&
+            $classValue !== ''
+        ) {
+
+            $decodedClass =
+                json_decode(
+                    $classValue,
+                    true
+                );
+
+
+            if (
+                is_array(
+                    $decodedClass
+                )
+            ) {
+
+                $gradeClass =
+                    trim(
+                        (string) (
+                            $decodedClass['grade_class']
+                            ?? ''
+                        )
+                    );
+
+
+                $stream =
+                    trim(
+                        (string) (
+                            $decodedClass['stream']
+                            ?? ''
+                        )
+                    );
+
+            }
+
+        }
+
+
+        if (
+            !$gradeClass
+            &&
+            $request->filled(
+                'grade_class'
+            )
+        ) {
+
+            $gradeClass =
+                trim(
+                    (string) $request->input(
+                        'grade_class'
+                    )
+                );
+
+        }
+
+
+        if (
+            !$stream
+            &&
+            $request->filled(
+                'stream'
+            )
+        ) {
+
+            $stream =
+                trim(
+                    (string) $request->input(
+                        'stream'
+                    )
+                );
+
+        }
+
+
+        if (
+            $gradeClass !== ''
+            &&
+            $stream !== ''
+        ) {
+
+            $selectedClass =
+                trim(
+                    $gradeClass
+                    . ' '
+                    . $stream
+                );
+
+
+            $query =
+                Borrowing::with([
+                    'book',
+                    'bookCopy',
+                    'borrower',
+                ])
+                ->where(
+                    'borrower_type',
+                    Learner::class
+                );
+
+
+            $query->whereHasMorph(
+                'borrower',
+                [
+                    Learner::class,
+                ],
+                function (
+                    $learnerQuery
+                ) use (
+                    $gradeClass,
+                    $stream
+                ) {
+
+                    $learnerQuery
+                        ->where(
+                            'grade_class',
+                            $gradeClass
+                        )
+                        ->where(
+                            'stream',
+                            $stream
+                        );
+
+                }
+            );
+
+
+            if (
+                $request->filled(
+                    'status'
+                )
+            ) {
+
+                $query->where(
+                    'status',
+                    $request->input(
+                        'status'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'from_date'
+                )
+            ) {
+
+                $query->whereDate(
+                    'borrowed_date',
+                    '>=',
+                    $request->input(
+                        'from_date'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'to_date'
+                )
+            ) {
+
+                $query->whereDate(
+                    'borrowed_date',
+                    '<=',
+                    $request->input(
+                        'to_date'
+                    )
+                );
+
+            }
+
+
+            if (
+                $request->filled(
+                    'search'
+                )
+            ) {
+
+                $search =
+                    trim(
+                        (string) $request->input(
+                            'search'
+                        )
+                    );
+
+
+                $query->where(
+                    function (
+                        $searchQuery
+                    ) use (
+                        $search
+                    ) {
+
+                        $searchQuery->whereHasMorph(
+                            'borrower',
+                            [
+                                Learner::class,
+                            ],
+                            function (
+                                $learnerQuery
+                            ) use (
+                                $search
+                            ) {
+
+                                $learnerQuery
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'admission_number',
+                                        'like',
+                                        '%' . $search . '%'
+                                    );
+
+                            }
+                        );
+
+
+                        $searchQuery->orWhereHas(
+                            'book',
+                            function (
+                                $bookQuery
+                            ) use (
+                                $search
+                            ) {
+
+                                $bookQuery
+                                    ->where(
+                                        'title',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'author',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'book_code',
+                                        'like',
+                                        '%' . $search . '%'
+                                    )
+                                    ->orWhere(
+                                        'isbn',
+                                        'like',
+                                        '%' . $search . '%'
+                                    );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+
+
+            $borrowings =
+                $query
+                    ->orderByDesc(
+                        'borrowed_date'
+                    )
+                    ->orderByDesc(
+                        'id'
+                    )
+                    ->get();
+
+        }
+
+
+        $reportDate =
+            Carbon::now();
+
+
+        return view(
+            'reports.class-borrowing-preview',
+            compact(
+                'borrowings',
+                'reportDate',
+                'selectedClass',
+                'gradeClass',
+                'stream'
             )
         );
 
