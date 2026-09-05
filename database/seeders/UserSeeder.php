@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Seed the application's librarian user.
-     */
     public function run(): void
     {
         User::updateOrCreate(
