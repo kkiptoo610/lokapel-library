@@ -90,7 +90,6 @@
             margin: 0;
 
             background:
-
                 linear-gradient(
                     180deg,
                     #F8FAFC 0%,
@@ -100,13 +99,34 @@
             color: var(--text-dark);
 
             font-family:
-
                 Inter,
                 system-ui,
                 -apple-system,
                 BlinkMacSystemFont,
                 "Segoe UI",
                 sans-serif;
+
+        }
+
+
+        /* ========================================================= */
+        /* MOBILE MENU BUTTON */
+        /* ========================================================= */
+
+        .mobile-menu-button {
+
+            display: none;
+
+        }
+
+
+        /* ========================================================= */
+        /* MOBILE OVERLAY */
+        /* ========================================================= */
+
+        .sidebar-overlay {
+
+            display: none;
 
         }
 
@@ -133,10 +153,9 @@
 
             overflow-y: auto;
 
-            z-index: 1000;
+            z-index: 1200;
 
             background:
-
                 linear-gradient(
                     180deg,
                     var(--sidebar-dark),
@@ -144,7 +163,6 @@
                 );
 
             box-shadow:
-
                 8px 0 30px
                 rgba(
                     15,
@@ -162,9 +180,7 @@
 
         .sidebar .brand {
 
-            padding:
-
-                24px 22px;
+            padding: 24px 22px;
 
             color: white;
 
@@ -179,9 +195,7 @@
             gap: 12px;
 
             border-bottom:
-
                 1px solid
-
                 rgba(
                     255,
                     255,
@@ -209,7 +223,6 @@
             font-size: 21px;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #3B82F6,
@@ -217,9 +230,7 @@
                 );
 
             box-shadow:
-
                 0 8px 20px
-
                 rgba(
                     59,
                     130,
@@ -251,7 +262,7 @@
 
 
         /* ========================================================= */
-        /* SIDEBAR NAVIGATION AREA */
+        /* SIDEBAR NAVIGATION */
         /* ========================================================= */
 
         .sidebar-navigation {
@@ -264,13 +275,12 @@
 
 
         /* ========================================================= */
-        /* NAVIGATION */
+        /* NAVIGATION LINKS */
         /* ========================================================= */
 
         .sidebar a {
 
             color:
-
                 rgba(
                     255,
                     255,
@@ -287,11 +297,9 @@
             gap: 13px;
 
             padding:
-
                 12px 18px;
 
             margin:
-
                 4px 12px;
 
             border-radius: 10px;
@@ -301,7 +309,6 @@
             font-weight: 500;
 
             transition:
-
                 all
                 0.25s
                 ease;
@@ -323,13 +330,11 @@
         .sidebar a:hover {
 
             background:
-
                 var(--sidebar-hover);
 
             color: white;
 
             transform:
-
                 translateX(3px);
 
         }
@@ -342,7 +347,6 @@
         .sidebar a.active {
 
             background:
-
                 linear-gradient(
                     135deg,
                     #2563EB,
@@ -352,9 +356,7 @@
             color: white;
 
             box-shadow:
-
                 0 8px 20px
-
                 rgba(
                     37,
                     99,
@@ -380,7 +382,6 @@
             text-transform: uppercase;
 
             color:
-
                 rgba(
                     255,
                     255,
@@ -389,7 +390,6 @@
                 );
 
             padding:
-
                 24px 22px
                 8px;
 
@@ -397,19 +397,16 @@
 
 
         /* ========================================================= */
-        /* USER ACCOUNT AREA */
+        /* USER ACCOUNT */
         /* ========================================================= */
 
         .user-account-section {
 
             padding:
-
                 15px 12px;
 
             border-top:
-
                 1px solid
-
                 rgba(
                     255,
                     255,
@@ -428,14 +425,11 @@
 
             gap: 12px;
 
-            padding:
-
-                12px;
+            padding: 12px;
 
             border-radius: 12px;
 
             background:
-
                 rgba(
                     255,
                     255,
@@ -467,7 +461,6 @@
             font-size: 19px;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #2563EB,
@@ -510,7 +503,6 @@
             margin-top: 2px;
 
             color:
-
                 rgba(
                     255,
                     255,
@@ -524,13 +516,12 @@
 
 
         /* ========================================================= */
-        /* LOGOUT AREA */
+        /* LOGOUT */
         /* ========================================================= */
 
         .logout-section {
 
             padding:
-
                 0 12px
                 20px;
 
@@ -561,7 +552,6 @@
             gap: 10px;
 
             padding:
-
                 12px 18px;
 
             border-radius: 10px;
@@ -573,7 +563,6 @@
             color: #FCA5A5;
 
             background:
-
                 rgba(
                     239,
                     68,
@@ -584,7 +573,6 @@
             cursor: pointer;
 
             transition:
-
                 all
                 0.25s
                 ease;
@@ -604,7 +592,6 @@
             color: white;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #DC2626,
@@ -612,13 +599,10 @@
                 );
 
             transform:
-
                 translateY(-2px);
 
             box-shadow:
-
                 0 8px 20px
-
                 rgba(
                     239,
                     68,
@@ -639,9 +623,7 @@
 
             min-height: 100vh;
 
-            padding:
-
-                35px;
+            padding: 35px;
 
         }
 
@@ -692,7 +674,8 @@
 
             color: var(--primary);
 
-            background: var(--primary-light);
+            background:
+                var(--primary-light);
 
         }
 
@@ -713,10 +696,10 @@
         .page-title p {
 
             margin:
-
                 4px 0 0;
 
-            color: var(--text-muted);
+            color:
+                var(--text-muted);
 
         }
 
@@ -730,9 +713,7 @@
             background: white;
 
             border:
-
                 1px solid
-
                 rgba(
                     226,
                     232,
@@ -743,9 +724,7 @@
             border-radius: 18px;
 
             box-shadow:
-
                 0 10px 30px
-
                 rgba(
                     15,
                     23,
@@ -772,7 +751,6 @@
         .search-card {
 
             background:
-
                 linear-gradient(
                     135deg,
                     #FFFFFF,
@@ -787,15 +765,12 @@
         /* ========================================================= */
 
         .form-control,
-
         .form-select {
 
             border-radius: 10px;
 
             border:
-
                 1px solid
-
                 var(--border);
 
             min-height: 46px;
@@ -806,17 +781,13 @@
 
 
         .form-control:focus,
-
         .form-select:focus {
 
             border-color:
-
                 var(--primary);
 
             box-shadow:
-
                 0 0 0 4px
-
                 rgba(
                     37,
                     99,
@@ -838,11 +809,9 @@
             font-weight: 600;
 
             padding:
-
                 9px 16px;
 
             transition:
-
                 all
                 0.2s
                 ease;
@@ -855,22 +824,10 @@
             border: none;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #2563EB,
                     #3B82F6
-                );
-
-            box-shadow:
-
-                0 6px 15px
-
-                rgba(
-                    37,
-                    99,
-                    235,
-                    0.22
                 );
 
         }
@@ -879,16 +836,7 @@
         .btn-primary:hover {
 
             transform:
-
                 translateY(-2px);
-
-            background:
-
-                linear-gradient(
-                    135deg,
-                    #1D4ED8,
-                    #2563EB
-                );
 
         }
 
@@ -896,7 +844,6 @@
         .btn-success {
 
             background:
-
                 linear-gradient(
                     135deg,
                     #059669,
@@ -922,7 +869,6 @@
         .btn-danger {
 
             background:
-
                 linear-gradient(
                     135deg,
                     #DC2626,
@@ -966,44 +912,25 @@
 
             border: none;
 
-            padding:
-
-                16px;
+            padding: 16px;
 
         }
 
 
         .modern-table td {
 
-            padding:
+            padding: 16px;
 
-                16px;
-
-            border-color:
-
-                #F1F5F9;
+            border-color: #F1F5F9;
 
             color: #334155;
 
         }
 
 
-        .modern-table tbody tr {
-
-            transition:
-
-                background
-                0.2s
-                ease;
-
-        }
-
-
         .modern-table tbody tr:hover {
 
-            background:
-
-                #F8FBFF;
+            background: #F8FBFF;
 
         }
 
@@ -1018,9 +945,7 @@
 
             color: #2563EB;
 
-            padding:
-
-                7px 11px;
+            padding: 7px 11px;
 
             border-radius: 20px;
 
@@ -1033,9 +958,7 @@
 
             color: #059669;
 
-            padding:
-
-                7px 11px;
+            padding: 7px 11px;
 
             border-radius: 20px;
 
@@ -1048,9 +971,7 @@
 
             color: #D97706;
 
-            padding:
-
-                7px 11px;
+            padding: 7px 11px;
 
             border-radius: 20px;
 
@@ -1063,9 +984,7 @@
 
             color: #DC2626;
 
-            padding:
-
-                7px 11px;
+            padding: 7px 11px;
 
             border-radius: 20px;
 
@@ -1078,9 +997,7 @@
 
             color: #7C3AED;
 
-            padding:
-
-                7px 11px;
+            padding: 7px 11px;
 
             border-radius: 20px;
 
@@ -1182,10 +1099,10 @@
 
 
         /* ========================================================= */
-        /* RESPONSIVE */
+        /* TABLET */
         /* ========================================================= */
 
-        @media (max-width: 992px) {
+        @media (max-width: 992px) and (min-width: 769px) {
 
             .sidebar {
 
@@ -1205,24 +1122,114 @@
         }
 
 
+        /* ========================================================= */
+        /* MOBILE */
+        /* ========================================================= */
+
         @media (max-width: 768px) {
 
-            .sidebar {
+            .mobile-menu-button {
 
-                position: relative;
+                display: flex;
 
-                width: 100%;
+                position: fixed;
 
-                height: auto;
+                top: 15px;
 
-                min-height: auto;
+                left: 15px;
+
+                width: 48px;
+
+                height: 48px;
+
+                align-items: center;
+
+                justify-content: center;
+
+                border: none;
+
+                border-radius: 12px;
+
+                color: white;
+
+                background:
+                    var(--sidebar-dark);
+
+                box-shadow:
+                    0 8px 20px
+                    rgba(
+                        15,
+                        23,
+                        42,
+                        0.25
+                    );
+
+                z-index: 1300;
+
+                font-size: 25px;
+
+                cursor: pointer;
 
             }
 
 
-            .sidebar-navigation {
+            .sidebar {
 
-                flex: none;
+                position: fixed;
+
+                top: 0;
+
+                left: -280px;
+
+                width: 260px;
+
+                height: 100vh;
+
+                min-height: 100vh;
+
+                transition:
+                    left
+                    0.3s
+                    ease;
+
+            }
+
+
+            .sidebar.mobile-open {
+
+                left: 0;
+
+            }
+
+
+            .sidebar-overlay {
+
+                position: fixed;
+
+                top: 0;
+
+                left: 0;
+
+                width: 100%;
+
+                height: 100%;
+
+                background:
+                    rgba(
+                        15,
+                        23,
+                        42,
+                        0.5
+                    );
+
+                z-index: 1150;
+
+            }
+
+
+            .sidebar-overlay.active {
+
+                display: block;
 
             }
 
@@ -1231,7 +1238,12 @@
 
                 margin-left: 0;
 
-                padding: 20px;
+                width: 100%;
+
+                padding:
+                    80px
+                    15px
+                    20px;
 
             }
 
@@ -1246,6 +1258,52 @@
 
             }
 
+
+            .page-title {
+
+                padding-left: 48px;
+
+            }
+
+
+            .page-title h1 {
+
+                font-size: 22px;
+
+            }
+
+
+            .page-title-icon {
+
+                width: 45px;
+
+                height: 45px;
+
+                font-size: 20px;
+
+            }
+
+
+            .modern-page-card {
+
+                border-radius: 14px;
+
+            }
+
+
+            .modern-page-card .card-body {
+
+                padding: 15px;
+
+            }
+
+
+            .table-responsive {
+
+                border-radius: 12px;
+
+            }
+
         }
 
     </style>
@@ -1257,15 +1315,42 @@
 
 
 <!-- ========================================================= -->
+<!-- MOBILE MENU BUTTON -->
+<!-- ========================================================= -->
+
+<button
+    type="button"
+    class="mobile-menu-button"
+    id="mobileMenuButton"
+    aria-label="Open menu"
+>
+
+    <i class="bi bi-list"></i>
+
+</button>
+
+
+<!-- ========================================================= -->
+<!-- MOBILE OVERLAY -->
+<!-- ========================================================= -->
+
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+></div>
+
+
+<!-- ========================================================= -->
 <!-- SIDEBAR -->
 <!-- ========================================================= -->
 
-<div class="sidebar">
+<div
+    class="sidebar"
+    id="sidebar"
+>
 
 
-    <!-- ========================================================= -->
     <!-- BRAND -->
-    <!-- ========================================================= -->
 
     <div class="brand">
 
@@ -1298,8 +1383,6 @@
     <div class="sidebar-navigation">
 
 
-        <!-- DASHBOARD -->
-
         <a
             href="{{ route('dashboard') }}"
             class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"
@@ -1312,16 +1395,12 @@
         </a>
 
 
-        <!-- LIBRARY MANAGEMENT -->
-
         <div class="nav-section">
 
             Library Management
 
         </div>
 
-
-        <!-- CATEGORIES -->
 
         <a
             href="{{ route('categories.index') }}"
@@ -1335,8 +1414,6 @@
         </a>
 
 
-        <!-- BOOKS -->
-
         <a
             href="{{ route('books.index') }}"
             class="{{ request()->routeIs('books.*') ? 'active' : '' }}"
@@ -1349,16 +1426,12 @@
         </a>
 
 
-        <!-- BORROWERS -->
-
         <div class="nav-section">
 
             Borrowers
 
         </div>
 
-
-        <!-- TEACHERS -->
 
         <a
             href="{{ route('teachers.index') }}"
@@ -1372,8 +1445,6 @@
         </a>
 
 
-        <!-- STAFF -->
-
         <a
             href="{{ route('staff.index') }}"
             class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"
@@ -1385,8 +1456,6 @@
 
         </a>
 
-
-        <!-- LEARNERS -->
 
         <a
             href="{{ route('learners.index') }}"
@@ -1400,16 +1469,12 @@
         </a>
 
 
-        <!-- TRANSACTIONS -->
-
         <div class="nav-section">
 
             Transactions
 
         </div>
 
-
-        <!-- BORROWINGS -->
 
         <a
             href="{{ route('borrowings.index') }}"
@@ -1423,8 +1488,6 @@
         </a>
 
 
-        <!-- ISSUE BOOK -->
-
         <a
             href="{{ route('borrowings.create') }}"
             class="{{ request()->routeIs('borrowings.create') ? 'active' : '' }}"
@@ -1436,8 +1499,6 @@
 
         </a>
 
-
-        <!-- REPORTS -->
 
         <a
             href="{{ route('reports.index') }}"
@@ -1451,18 +1512,12 @@
         </a>
 
 
-        <!-- ========================================================= -->
-        <!-- ACCOUNT -->
-        <!-- ========================================================= -->
-
         <div class="nav-section">
 
             Account
 
         </div>
 
-
-        <!-- CHANGE PASSWORD -->
 
         <a
             href="{{ route('password.change') }}"
@@ -1499,7 +1554,6 @@
 
                 <div class="user-details">
 
-
                     <div class="user-name">
 
                         {{ auth()->user()->name }}
@@ -1513,22 +1567,17 @@
 
                     </div>
 
-
                 </div>
 
 
             </div>
 
-
         </div>
 
 
-        <!-- ========================================================= -->
         <!-- LOGOUT -->
-        <!-- ========================================================= -->
 
         <div class="logout-section">
-
 
             <form
                 action="{{ route('logout') }}"
@@ -1553,7 +1602,6 @@
 
 
             </form>
-
 
         </div>
 
@@ -1590,7 +1638,6 @@
                 data-bs-dismiss="alert"
             ></button>
 
-
         </div>
 
     @endif
@@ -1616,7 +1663,6 @@
                 data-bs-dismiss="alert"
             ></button>
 
-
         </div>
 
     @endif
@@ -1630,11 +1676,138 @@
 </div>
 
 
-<!-- Bootstrap JavaScript -->
+<!-- ========================================================= -->
+<!-- BOOTSTRAP JAVASCRIPT -->
+<!-- ========================================================= -->
 
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 ></script>
+
+
+<!-- ========================================================= -->
+<!-- MOBILE SIDEBAR JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            const menuButton =
+                document.getElementById(
+                    'mobileMenuButton'
+                );
+
+
+            const sidebar =
+                document.getElementById(
+                    'sidebar'
+                );
+
+
+            const overlay =
+                document.getElementById(
+                    'sidebarOverlay'
+                );
+
+
+            function openSidebar() {
+
+                sidebar.classList.add(
+                    'mobile-open'
+                );
+
+
+                overlay.classList.add(
+                    'active'
+                );
+
+            }
+
+
+            function closeSidebar() {
+
+                sidebar.classList.remove(
+                    'mobile-open'
+                );
+
+
+                overlay.classList.remove(
+                    'active'
+                );
+
+            }
+
+
+            if (menuButton) {
+
+                menuButton.addEventListener(
+                    'click',
+                    function () {
+
+                        if (
+                            sidebar.classList.contains(
+                                'mobile-open'
+                            )
+                        ) {
+
+                            closeSidebar();
+
+                        } else {
+
+                            openSidebar();
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            if (overlay) {
+
+                overlay.addEventListener(
+                    'click',
+                    closeSidebar
+                );
+
+            }
+
+
+            if (sidebar) {
+
+                sidebar
+                    .querySelectorAll('a')
+                    .forEach(
+                        function (link) {
+
+                            link.addEventListener(
+                                'click',
+                                function () {
+
+                                    if (
+                                        window.innerWidth <= 768
+                                    ) {
+
+                                        closeSidebar();
+
+                                    }
+
+                                }
+                            );
+
+                        }
+                    );
+
+            }
+
+        }
+    );
+
+</script>
 
 
 </body>
