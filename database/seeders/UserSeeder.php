@@ -20,8 +20,6 @@ class UserSeeder extends Seeder
                 'email' => 'library@lokapelsenior.local',
 
                 'password' => Hash::make('123456'),
-
-                'is_active' => true,
             ]
         );
     }

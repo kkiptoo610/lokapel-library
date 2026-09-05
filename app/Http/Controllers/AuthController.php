@@ -66,8 +66,7 @@ class AuthController extends Controller
         | Find User
         |--------------------------------------------------------------------------
         |
-        | The database does not contain a username column.
-        | Therefore, users can log in using:
+        | Users can log in using:
         |
         | 1. Full Name
         | 2. Email Address
@@ -120,26 +119,12 @@ class AuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Check Whether Account Is Active
-        |--------------------------------------------------------------------------
-        */
-
-        if (! $user->is_active) {
-            return back()
-                ->withInput(
-                    $request->only('username')
-                )
-                ->withErrors([
-                    'username' =>
-                        'This account has been disabled. Please contact the administrator.',
-                ]);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
         | Log User In
         |--------------------------------------------------------------------------
+        |
+        | No is_active check because the users table
+        | does not contain an is_active column.
+        |
         */
 
         Auth::login(
