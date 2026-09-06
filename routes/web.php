@@ -11,12 +11,14 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\InventoryController;
 
 use App\Models\BookCopy;
 use App\Models\Borrowing;
 use App\Models\Learner;
 use App\Models\Staff;
 use App\Models\Teacher;
+use App\Models\InventoryItem;
 
 use Carbon\Carbon;
 
@@ -68,9 +70,6 @@ Route::post(
 |--------------------------------------------------------------------------
 | Protected Library System Routes
 |--------------------------------------------------------------------------
-|
-| Everything inside this group requires a librarian to log in.
-|
 */
 
 Route::middleware('auth')->group(function () {
@@ -173,6 +172,93 @@ Route::middleware('auth')->group(function () {
             'status',
             'overdue'
         )->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INVENTORY STATISTICS
+        |--------------------------------------------------------------------------
+        */
+
+        $totalInventoryItems = InventoryItem::count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEACHERS INVENTORY ITEMS
+        |--------------------------------------------------------------------------
+        */
+
+        $teachersInventoryItems = 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LABORATORY INVENTORY ITEMS
+        |--------------------------------------------------------------------------
+        */
+
+        $laboratoryInventoryItems = 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GET INVENTORY CATEGORY COUNTS SAFELY
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $teachersInventoryItems = InventoryItem::whereHas(
+                'category',
+                function ($query) {
+
+                    $query->where(
+                        'name',
+                        'Teachers'
+                    );
+
+                }
+            )->count();
+
+
+            $laboratoryInventoryItems = InventoryItem::whereHas(
+                'category',
+                function ($query) {
+
+                    $query->where(
+                        'name',
+                        'Laboratory'
+                    );
+
+                }
+            )->count();
+
+        } catch (\Throwable $exception) {
+
+            $teachersInventoryItems = 0;
+
+            $laboratoryInventoryItems = 0;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOW STOCK INVENTORY ITEMS
+        |--------------------------------------------------------------------------
+        */
+
+        $lowStockInventoryItems = InventoryItem::get()
+            ->filter(function ($item) {
+
+                return
+                    (int) $item->quantity
+                    <=
+                    (int) $item->minimum_quantity;
+
+            })
+            ->count();
 
 
         /*
@@ -310,13 +396,21 @@ Route::middleware('auth')->group(function () {
                 'borrowedBooks',
                 'damagedBooks',
                 'overdueBooks',
+
+                'totalInventoryItems',
+                'teachersInventoryItems',
+                'laboratoryInventoryItems',
+                'lowStockInventoryItems',
+
                 'learnersCount',
                 'teachersCount',
                 'staffCount',
+
                 'borrowedToday',
                 'returnedToday',
                 'borrowedThisWeek',
                 'borrowedThisMonth',
+
                 'recentBorrowings',
                 'overdueBorrowings',
                 'popularBooks'
@@ -348,13 +442,6 @@ Route::middleware('auth')->group(function () {
         'books',
         BookController::class
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Individual Physical Book Copies
-    |--------------------------------------------------------------------------
-    */
 
 
     /*
@@ -469,6 +556,234 @@ Route::middleware('auth')->group(function () {
         'learners',
         LearnerController::class
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INVENTORY MANAGEMENT
+    |--------------------------------------------------------------------------
+    */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory Main Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory',
+        [InventoryController::class, 'index']
+    )->name('inventory.index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ALL INVENTORY ITEMS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items',
+        [InventoryController::class, 'items']
+    )->name('inventory.items.index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ISSUE INVENTORY ITEM - SELECT ITEM
+    |--------------------------------------------------------------------------
+    |
+    | This route is used by the new "Issue Item" card.
+    | The user first selects an inventory item, then proceeds
+    | to the existing issue form.
+    |
+    */
+
+    Route::get(
+        '/inventory/issue',
+        [InventoryController::class, 'issueIndex']
+    )->name('inventory.issue');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Teachers Inventory Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/teachers',
+        [InventoryController::class, 'teachers']
+    )->name('inventory.teachers');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laboratory Inventory Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/laboratory',
+        [InventoryController::class, 'laboratory']
+    )->name('inventory.laboratory');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Add Inventory Item Form
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items/create',
+        [InventoryController::class, 'create']
+    )->name('inventory.items.create');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Inventory Item
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/inventory/items',
+        [InventoryController::class, 'store']
+    )->name('inventory.items.store');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Issue Specific Inventory Item Form
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items/{item}/issue',
+        [InventoryController::class, 'showIssueForm']
+    )->name('inventory.items.issue');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Inventory Issue
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/inventory/items/{item}/issue',
+        [InventoryController::class, 'issue']
+    )->name('inventory.items.issue.store');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Manual Inventory Restocking Form
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items/{item}/restock',
+        [InventoryController::class, 'showRestockForm']
+    )->name('inventory.items.restock');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Manual Inventory Restock
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/inventory/items/{item}/restock',
+        [InventoryController::class, 'restock']
+    )->name('inventory.items.restock.store');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | View Inventory Item
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items/{item}',
+        [InventoryController::class, 'show']
+    )->name('inventory.items.show');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Inventory Item
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/items/{item}/edit',
+        [InventoryController::class, 'edit']
+    )->name('inventory.items.edit');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Inventory Item
+    |--------------------------------------------------------------------------
+    */
+
+    Route::put(
+        '/inventory/items/{item}',
+        [InventoryController::class, 'update']
+    )->name('inventory.items.update');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Inventory Item
+    |--------------------------------------------------------------------------
+    */
+
+    Route::delete(
+        '/inventory/items/{item}',
+        [InventoryController::class, 'destroy']
+    )->name('inventory.items.destroy');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory Restock History
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/restocks',
+        [InventoryController::class, 'restocks']
+    )->name('inventory.restocks');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory Issue History
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/issues',
+        [InventoryController::class, 'issues']
+    )->name('inventory.issues');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Low Stock Inventory
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/inventory/low-stock',
+        [InventoryController::class, 'lowStock']
+    )->name('inventory.low-stock');
 
 
     /*
@@ -590,10 +905,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | CLASS BORROWING REPORT
     |--------------------------------------------------------------------------
-    |
-    | Displays borrowing records for learners grouped or filtered
-    | according to their class, for example Grade 10 West.
-    |
     */
 
     Route::get(
@@ -606,9 +917,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | CLASS BORROWING REPORT PREVIEW / PRINT
     |--------------------------------------------------------------------------
-    |
-    | Used later for a clean printable version of a selected class report.
-    |
     */
 
     Route::get(
@@ -747,6 +1055,5 @@ Route::middleware('auth')->group(function () {
         '/reports/borrower-activity/preview',
         [ReportController::class, 'borrowerActivityPreview']
     )->name('reports.borrower-activity.preview');
-
 
 });
