@@ -11,14 +11,12 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\InventoryController;
 
 use App\Models\BookCopy;
 use App\Models\Borrowing;
 use App\Models\Learner;
 use App\Models\Staff;
 use App\Models\Teacher;
-use App\Models\InventoryItem;
 
 use Carbon\Carbon;
 
@@ -28,7 +26,6 @@ use Carbon\Carbon;
 | Authentication Routes
 |--------------------------------------------------------------------------
 */
-
 
 /*
 |--------------------------------------------------------------------------
@@ -176,93 +173,6 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | INVENTORY STATISTICS
-        |--------------------------------------------------------------------------
-        */
-
-        $totalInventoryItems = InventoryItem::count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TEACHERS INVENTORY ITEMS
-        |--------------------------------------------------------------------------
-        */
-
-        $teachersInventoryItems = 0;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | LABORATORY INVENTORY ITEMS
-        |--------------------------------------------------------------------------
-        */
-
-        $laboratoryInventoryItems = 0;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | GET INVENTORY CATEGORY COUNTS SAFELY
-        |--------------------------------------------------------------------------
-        */
-
-        try {
-
-            $teachersInventoryItems = InventoryItem::whereHas(
-                'category',
-                function ($query) {
-
-                    $query->where(
-                        'name',
-                        'Teachers'
-                    );
-
-                }
-            )->count();
-
-
-            $laboratoryInventoryItems = InventoryItem::whereHas(
-                'category',
-                function ($query) {
-
-                    $query->where(
-                        'name',
-                        'Laboratory'
-                    );
-
-                }
-            )->count();
-
-        } catch (\Throwable $exception) {
-
-            $teachersInventoryItems = 0;
-
-            $laboratoryInventoryItems = 0;
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOW STOCK INVENTORY ITEMS
-        |--------------------------------------------------------------------------
-        */
-
-        $lowStockInventoryItems = InventoryItem::get()
-            ->filter(function ($item) {
-
-                return
-                    (int) $item->quantity
-                    <=
-                    (int) $item->minimum_quantity;
-
-            })
-            ->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
         | PEOPLE STATISTICS
         |--------------------------------------------------------------------------
         */
@@ -396,11 +306,6 @@ Route::middleware('auth')->group(function () {
                 'borrowedBooks',
                 'damagedBooks',
                 'overdueBooks',
-
-                'totalInventoryItems',
-                'teachersInventoryItems',
-                'laboratoryInventoryItems',
-                'lowStockInventoryItems',
 
                 'learnersCount',
                 'teachersCount',
@@ -560,234 +465,6 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | INVENTORY MANAGEMENT
-    |--------------------------------------------------------------------------
-    */
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Inventory Main Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory',
-        [InventoryController::class, 'index']
-    )->name('inventory.index');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ALL INVENTORY ITEMS
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items',
-        [InventoryController::class, 'items']
-    )->name('inventory.items.index');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ISSUE INVENTORY ITEM - SELECT ITEM
-    |--------------------------------------------------------------------------
-    |
-    | This route is used by the new "Issue Item" card.
-    | The user first selects an inventory item, then proceeds
-    | to the existing issue form.
-    |
-    */
-
-    Route::get(
-        '/inventory/issue',
-        [InventoryController::class, 'issueIndex']
-    )->name('inventory.issue');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Teachers Inventory Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/teachers',
-        [InventoryController::class, 'teachers']
-    )->name('inventory.teachers');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Laboratory Inventory Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/laboratory',
-        [InventoryController::class, 'laboratory']
-    )->name('inventory.laboratory');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Add Inventory Item Form
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items/create',
-        [InventoryController::class, 'create']
-    )->name('inventory.items.create');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Store Inventory Item
-    |--------------------------------------------------------------------------
-    */
-
-    Route::post(
-        '/inventory/items',
-        [InventoryController::class, 'store']
-    )->name('inventory.items.store');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Issue Specific Inventory Item Form
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items/{item}/issue',
-        [InventoryController::class, 'showIssueForm']
-    )->name('inventory.items.issue');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Store Inventory Issue
-    |--------------------------------------------------------------------------
-    */
-
-    Route::post(
-        '/inventory/items/{item}/issue',
-        [InventoryController::class, 'issue']
-    )->name('inventory.items.issue.store');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Manual Inventory Restocking Form
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items/{item}/restock',
-        [InventoryController::class, 'showRestockForm']
-    )->name('inventory.items.restock');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Store Manual Inventory Restock
-    |--------------------------------------------------------------------------
-    */
-
-    Route::post(
-        '/inventory/items/{item}/restock',
-        [InventoryController::class, 'restock']
-    )->name('inventory.items.restock.store');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | View Inventory Item
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items/{item}',
-        [InventoryController::class, 'show']
-    )->name('inventory.items.show');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Edit Inventory Item
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/items/{item}/edit',
-        [InventoryController::class, 'edit']
-    )->name('inventory.items.edit');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Inventory Item
-    |--------------------------------------------------------------------------
-    */
-
-    Route::put(
-        '/inventory/items/{item}',
-        [InventoryController::class, 'update']
-    )->name('inventory.items.update');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Delete Inventory Item
-    |--------------------------------------------------------------------------
-    */
-
-    Route::delete(
-        '/inventory/items/{item}',
-        [InventoryController::class, 'destroy']
-    )->name('inventory.items.destroy');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Inventory Restock History
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/restocks',
-        [InventoryController::class, 'restocks']
-    )->name('inventory.restocks');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Inventory Issue History
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/issues',
-        [InventoryController::class, 'issues']
-    )->name('inventory.issues');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Low Stock Inventory
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/inventory/low-stock',
-        [InventoryController::class, 'lowStock']
-    )->name('inventory.low-stock');
-
-
-    /*
-    |--------------------------------------------------------------------------
     | Borrowing Management
     |--------------------------------------------------------------------------
     */
@@ -903,7 +580,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | CLASS BORROWING REPORT
+    | Class Borrowing Report
     |--------------------------------------------------------------------------
     */
 
@@ -915,7 +592,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | CLASS BORROWING REPORT PREVIEW / PRINT
+    | Class Borrowing Report Preview
     |--------------------------------------------------------------------------
     */
 
@@ -1001,6 +678,10 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | Library Inventory Report
     |--------------------------------------------------------------------------
+    |
+    | This remains because it reports on library books
+    | and book copies, not the removed store inventory system.
+    |
     */
 
     Route::get(
