@@ -11,6 +11,7 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationController;
 
 use App\Models\BookCopy;
 use App\Models\Borrowing;
@@ -106,6 +107,54 @@ Route::middleware('auth')->group(function () {
         '/change-password',
         [AuthController::class, 'changePassword']
     )->name('password.change.update');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notifications
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Display All Notifications
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/notifications',
+        [NotificationController::class, 'index']
+    )->name(
+        'notifications.index'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mark Single Notification As Read
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/notifications/{notificationId}/read',
+        [NotificationController::class, 'markAsRead']
+    )->name(
+        'notifications.read'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mark All Notifications As Read
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/notifications/read-all',
+        [NotificationController::class, 'markAllAsRead']
+    )->name(
+        'notifications.read-all'
+    );
 
 
     /*

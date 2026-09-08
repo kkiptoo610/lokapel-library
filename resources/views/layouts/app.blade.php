@@ -81,7 +81,6 @@
         }
 
 
-
         /* ========================================================= */
         /* BODY */
         /* ========================================================= */
@@ -110,7 +109,6 @@
         }
 
 
-
         /* ========================================================= */
         /* MOBILE MENU BUTTON */
         /* ========================================================= */
@@ -122,7 +120,6 @@
         }
 
 
-
         /* ========================================================= */
         /* MOBILE OVERLAY */
         /* ========================================================= */
@@ -132,7 +129,6 @@
             display: none;
 
         }
-
 
 
         /* ========================================================= */
@@ -178,7 +174,6 @@
         }
 
 
-
         /* ========================================================= */
         /* BRAND */
         /* ========================================================= */
@@ -209,7 +204,6 @@
                 );
 
         }
-
 
 
         .sidebar .brand-icon {
@@ -247,7 +241,6 @@
         }
 
 
-
         .brand-text {
 
             display: flex;
@@ -255,7 +248,6 @@
             flex-direction: column;
 
         }
-
 
 
         .brand-text small {
@@ -269,7 +261,6 @@
         }
 
 
-
         /* ========================================================= */
         /* SIDEBAR NAVIGATION */
         /* ========================================================= */
@@ -281,7 +272,6 @@
             padding-bottom: 20px;
 
         }
-
 
 
         /* ========================================================= */
@@ -326,7 +316,6 @@
         }
 
 
-
         .sidebar a i {
 
             font-size: 18px;
@@ -336,7 +325,6 @@
             text-align: center;
 
         }
-
 
 
         .sidebar a:hover {
@@ -350,7 +338,6 @@
                 translateX(3px);
 
         }
-
 
 
         /* ========================================================= */
@@ -378,7 +365,6 @@
                 );
 
         }
-
 
 
         /* ========================================================= */
@@ -410,6 +396,59 @@
         }
 
 
+        /* ========================================================= */
+        /* NOTIFICATION BADGE */
+        /* ========================================================= */
+
+        .notification-link {
+
+            position: relative;
+
+        }
+
+
+        .notification-badge {
+
+            margin-left: auto;
+
+            min-width: 22px;
+
+            height: 22px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 0 6px;
+
+            border-radius: 50px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #EF4444,
+                    #F87171
+                );
+
+            box-shadow:
+                0 4px 12px
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.35
+                );
+
+        }
+
 
         /* ========================================================= */
         /* USER ACCOUNT */
@@ -430,7 +469,6 @@
                 );
 
         }
-
 
 
         .user-account {
@@ -454,7 +492,6 @@
                 );
 
         }
-
 
 
         .user-avatar {
@@ -487,7 +524,6 @@
         }
 
 
-
         .user-details {
 
             min-width: 0;
@@ -497,7 +533,6 @@
             flex-direction: column;
 
         }
-
 
 
         .user-name {
@@ -517,7 +552,6 @@
         }
 
 
-
         .user-role {
 
             margin-top: 2px;
@@ -535,7 +569,6 @@
         }
 
 
-
         /* ========================================================= */
         /* LOGOUT */
         /* ========================================================= */
@@ -549,13 +582,11 @@
         }
 
 
-
         .logout-form {
 
             margin: 0;
 
         }
-
 
 
         .logout-button {
@@ -603,13 +634,11 @@
         }
 
 
-
         .logout-button i {
 
             font-size: 18px;
 
         }
-
 
 
         .logout-button:hover {
@@ -638,7 +667,6 @@
         }
 
 
-
         /* ========================================================= */
         /* MAIN CONTENT */
         /* ========================================================= */
@@ -652,7 +680,6 @@
             padding: 35px;
 
         }
-
 
 
         /* ========================================================= */
@@ -672,7 +699,6 @@
         }
 
 
-
         .page-title {
 
             display: flex;
@@ -682,7 +708,6 @@
             gap: 14px;
 
         }
-
 
 
         .page-title-icon {
@@ -709,7 +734,6 @@
         }
 
 
-
         .page-title h1 {
 
             margin: 0;
@@ -723,7 +747,6 @@
         }
 
 
-
         .page-title p {
 
             margin:
@@ -733,7 +756,6 @@
                 var(--text-muted);
 
         }
-
 
 
         /* ========================================================= */
@@ -769,13 +791,11 @@
         }
 
 
-
         .modern-page-card .card-body {
 
             padding: 25px;
 
         }
-
 
 
         /* ========================================================= */
@@ -792,7 +812,6 @@
                 );
 
         }
-
 
 
         /* ========================================================= */
@@ -815,7 +834,6 @@
         }
 
 
-
         .form-control:focus,
         .form-select:focus {
 
@@ -832,7 +850,6 @@
                 );
 
         }
-
 
 
         /* ========================================================= */
@@ -856,7 +873,6 @@
         }
 
 
-
         .btn-primary {
 
             border: none;
@@ -871,14 +887,12 @@
         }
 
 
-
         .btn-primary:hover {
 
             transform:
                 translateY(-2px);
 
         }
-
 
 
         .btn-success {
@@ -895,7 +909,6 @@
         }
 
 
-
         .btn-warning {
 
             background: #F59E0B;
@@ -905,7 +918,6 @@
             color: white;
 
         }
-
 
 
         .btn-danger {
@@ -922,7 +934,6 @@
         }
 
 
-
         /* ========================================================= */
         /* TABLE */
         /* ========================================================= */
@@ -934,13 +945,11 @@
         }
 
 
-
         .modern-table thead {
 
             background: #F8FAFC;
 
         }
-
 
 
         .modern-table th {
@@ -962,7 +971,6 @@
         }
 
 
-
         .modern-table td {
 
             padding: 16px;
@@ -974,13 +982,11 @@
         }
 
 
-
         .modern-table tbody tr:hover {
 
             background: #F8FBFF;
 
         }
-
 
 
         /* ========================================================= */
@@ -1000,7 +1006,6 @@
         }
 
 
-
         .badge-soft-success {
 
             background: #ECFDF5;
@@ -1012,7 +1017,6 @@
             border-radius: 20px;
 
         }
-
 
 
         .badge-soft-warning {
@@ -1028,7 +1032,6 @@
         }
 
 
-
         .badge-soft-danger {
 
             background: #FEF2F2;
@@ -1042,7 +1045,6 @@
         }
 
 
-
         .badge-soft-purple {
 
             background: #F5F3FF;
@@ -1054,7 +1056,6 @@
             border-radius: 20px;
 
         }
-
 
 
         /* ========================================================= */
@@ -1082,7 +1083,6 @@
         }
 
 
-
         .action-view {
 
             background: #EFF6FF;
@@ -1090,7 +1090,6 @@
             color: #2563EB;
 
         }
-
 
 
         .action-edit {
@@ -1102,7 +1101,6 @@
         }
 
 
-
         .action-delete {
 
             background: #FEF2F2;
@@ -1110,7 +1108,6 @@
             color: #DC2626;
 
         }
-
 
 
         .action-view:hover {
@@ -1122,7 +1119,6 @@
         }
 
 
-
         .action-edit:hover {
 
             background: #F59E0B;
@@ -1132,7 +1128,6 @@
         }
 
 
-
         .action-delete:hover {
 
             background: #EF4444;
@@ -1140,7 +1135,6 @@
             color: white;
 
         }
-
 
 
         /* ========================================================= */
@@ -1158,7 +1152,6 @@
         }
 
 
-
         /* ========================================================= */
         /* TABLET */
         /* ========================================================= */
@@ -1172,7 +1165,6 @@
             }
 
 
-
             .content {
 
                 margin-left: 220px;
@@ -1182,7 +1174,6 @@
             }
 
         }
-
 
 
         /* ========================================================= */
@@ -1236,7 +1227,6 @@
             }
 
 
-
             .sidebar {
 
                 position: fixed;
@@ -1259,13 +1249,11 @@
             }
 
 
-
             .sidebar.mobile-open {
 
                 left: 0;
 
             }
-
 
 
             .sidebar-overlay {
@@ -1293,13 +1281,11 @@
             }
 
 
-
             .sidebar-overlay.active {
 
                 display: block;
 
             }
-
 
 
             .content {
@@ -1316,7 +1302,6 @@
             }
 
 
-
             .page-header {
 
                 flex-direction: column;
@@ -1328,7 +1313,6 @@
             }
 
 
-
             .page-title {
 
                 padding-left: 48px;
@@ -1336,13 +1320,11 @@
             }
 
 
-
             .page-title h1 {
 
                 font-size: 22px;
 
             }
-
 
 
             .page-title-icon {
@@ -1356,7 +1338,6 @@
             }
 
 
-
             .modern-page-card {
 
                 border-radius: 14px;
@@ -1364,13 +1345,11 @@
             }
 
 
-
             .modern-page-card .card-body {
 
                 padding: 15px;
 
             }
-
 
 
             .table-responsive {
@@ -1405,7 +1384,6 @@
 </button>
 
 
-
 <!-- ========================================================= -->
 <!-- MOBILE OVERLAY -->
 <!-- ========================================================= -->
@@ -1414,7 +1392,6 @@
     class="sidebar-overlay"
     id="sidebarOverlay"
 ></div>
-
 
 
 <!-- ========================================================= -->
@@ -1453,7 +1430,6 @@
     </div>
 
 
-
     <!-- ========================================================= -->
     <!-- NAVIGATION -->
     <!-- ========================================================= -->
@@ -1477,7 +1453,6 @@
         </a>
 
 
-
         <!-- ========================================================= -->
         <!-- LIBRARY MANAGEMENT -->
         <!-- ========================================================= -->
@@ -1487,7 +1462,6 @@
             Library Management
 
         </div>
-
 
 
         <a
@@ -1502,7 +1476,6 @@
         </a>
 
 
-
         <a
             href="{{ route('books.index') }}"
             class="{{ request()->routeIs('books.*') ? 'active' : '' }}"
@@ -1515,7 +1488,6 @@
         </a>
 
 
-
         <!-- ========================================================= -->
         <!-- BORROWERS -->
         <!-- ========================================================= -->
@@ -1525,7 +1497,6 @@
             Borrowers
 
         </div>
-
 
 
         <a
@@ -1540,7 +1511,6 @@
         </a>
 
 
-
         <a
             href="{{ route('staff.index') }}"
             class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"
@@ -1551,7 +1521,6 @@
             Staff
 
         </a>
-
 
 
         <a
@@ -1566,7 +1535,6 @@
         </a>
 
 
-
         <!-- ========================================================= -->
         <!-- TRANSACTIONS -->
         <!-- ========================================================= -->
@@ -1576,7 +1544,6 @@
             Transactions
 
         </div>
-
 
 
         <a
@@ -1591,7 +1558,6 @@
         </a>
 
 
-
         <a
             href="{{ route('borrowings.create') }}"
             class="{{ request()->routeIs('borrowings.create') ? 'active' : '' }}"
@@ -1602,7 +1568,6 @@
             Issue Book
 
         </a>
-
 
 
         <a
@@ -1617,6 +1582,54 @@
         </a>
 
 
+        <!-- ========================================================= -->
+        <!-- NOTIFICATIONS -->
+        <!-- ========================================================= -->
+
+        @auth
+
+            <div class="nav-section">
+
+                Notifications
+
+            </div>
+
+
+            <a
+                href="{{ route('notifications.index') }}"
+                class="notification-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}"
+            >
+
+                <i class="bi bi-bell-fill"></i>
+
+                Notifications
+
+
+                @php
+
+                    $unreadNotificationsCount =
+                        auth()
+                            ->user()
+                            ->unreadNotifications()
+                            ->count();
+
+                @endphp
+
+
+                @if($unreadNotificationsCount > 0)
+
+                    <span class="notification-badge">
+
+                        {{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}
+
+                    </span>
+
+                @endif
+
+            </a>
+
+        @endauth
+
 
         <!-- ========================================================= -->
         <!-- ACCOUNT -->
@@ -1627,7 +1640,6 @@
             Account
 
         </div>
-
 
 
         <a
@@ -1643,7 +1655,6 @@
 
 
     </div>
-
 
 
     <!-- ========================================================= -->
@@ -1687,7 +1698,6 @@
         </div>
 
 
-
         <!-- LOGOUT -->
 
         <div class="logout-section">
@@ -1724,7 +1734,6 @@
 </div>
 
 
-
 <!-- ========================================================= -->
 <!-- MAIN CONTENT -->
 <!-- ========================================================= -->
@@ -1757,7 +1766,6 @@
     @endif
 
 
-
     <!-- ERROR MESSAGE -->
 
     @if(session('error'))
@@ -1783,6 +1791,57 @@
     @endif
 
 
+    <!-- VALIDATION ERRORS -->
+
+    @if($errors->any())
+
+        <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+        >
+
+            <div class="d-flex align-items-start">
+
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+                <div>
+
+                    <strong>
+
+                        Please correct the following errors:
+
+                    </strong>
+
+
+                    <ul class="mb-0 mt-2">
+
+                        @foreach($errors->all() as $error)
+
+                            <li>
+
+                                {{ $error }}
+
+                            </li>
+
+                        @endforeach
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+            ></button>
+
+        </div>
+
+    @endif
+
 
     <!-- PAGE CONTENT -->
 
@@ -1792,7 +1851,6 @@
 </div>
 
 
-
 <!-- ========================================================= -->
 <!-- BOOTSTRAP JAVASCRIPT -->
 <!-- ========================================================= -->
@@ -1800,7 +1858,6 @@
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 ></script>
-
 
 
 <!-- ========================================================= -->
@@ -1833,6 +1890,13 @@
 
             function openSidebar() {
 
+                if (!sidebar || !overlay) {
+
+                    return;
+
+                }
+
+
                 sidebar.classList.add(
                     'mobile-open'
                 );
@@ -1846,6 +1910,13 @@
 
 
             function closeSidebar() {
+
+                if (!sidebar || !overlay) {
+
+                    return;
+
+                }
+
 
                 sidebar.classList.remove(
                     'mobile-open'
@@ -1866,6 +1937,7 @@
                     function () {
 
                         if (
+                            sidebar &&
                             sidebar.classList.contains(
                                 'mobile-open'
                             )
@@ -1921,6 +1993,22 @@
                     );
 
             }
+
+
+            window.addEventListener(
+                'resize',
+                function () {
+
+                    if (
+                        window.innerWidth > 768
+                    ) {
+
+                        closeSidebar();
+
+                    }
+
+                }
+            );
 
         }
     );

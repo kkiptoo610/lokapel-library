@@ -11,6 +11,7 @@ use App\Models\Teacher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BorrowingController extends Controller
 {
@@ -25,6 +26,55 @@ class BorrowingController extends Controller
             ->update([
                 'status' => 'overdue',
             ]);
+    }
+
+
+    /**
+     * Create a system notification for the currently logged-in user.
+     */
+    private function createSystemNotification(
+        string $title,
+        string $message,
+        string $type = 'info',
+        ?string $url = null
+    ): void {
+        $user = auth()->user();
+
+        if (!$user) {
+            return;
+        }
+
+        $user->notifications()->create([
+
+            'id' => (string) Str::uuid(),
+
+            'type' => 'App\\Notifications\\LibrarySystemNotification',
+
+            'data' => [
+
+                'title' => $title,
+
+                'message' => $message,
+
+                /*
+                |--------------------------------------------------------------------------
+                | Notification Type
+                |--------------------------------------------------------------------------
+                |
+                | Keep both keys so existing notification views/components that
+                | use either "type" or "notification_type" continue to work.
+                |
+                */
+
+                'type' => $type,
+
+                'notification_type' => $type,
+
+                'url' => $url,
+
+            ],
+
+        ]);
     }
 
 
@@ -562,11 +612,15 @@ class BorrowingController extends Controller
         };
 
 
+        $issuedBorrowing = null;
+
+
         try {
 
             DB::transaction(function () use (
                 $validated,
-                $borrower
+                $borrower,
+                &$issuedBorrowing
             ) {
 
                 /*
@@ -629,7 +683,7 @@ class BorrowingController extends Controller
                 |------------------------------------------------------------------
                 */
 
-                Borrowing::create([
+                $issuedBorrowing = Borrowing::create([
 
                     'book_id' => $book->id,
 
@@ -709,6 +763,124 @@ class BorrowingController extends Controller
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE ISSUE NOTIFICATION
+        |--------------------------------------------------------------------------
+        */
+
+        if ($issuedBorrowing) {
+
+            /*
+            |----------------------------------------------------------------------
+            | LOAD RELATIONSHIPS
+            |----------------------------------------------------------------------
+            */
+
+            $issuedBorrowing->load([
+                'book',
+                'bookCopy',
+                'borrower',
+            ]);
+
+
+            /*
+            |----------------------------------------------------------------------
+            | EXACT PHYSICAL COPY NUMBER
+            |----------------------------------------------------------------------
+            */
+
+            $copyNumber =
+                $issuedBorrowing->bookCopy?->copy_number
+                ?? 'Unknown Copy';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | ACCESSION NUMBER
+            |----------------------------------------------------------------------
+            */
+
+            $accessionNumber =
+                $issuedBorrowing->bookCopy?->accession_number;
+
+
+            /*
+            |----------------------------------------------------------------------
+            | BORROWER NAME
+            |----------------------------------------------------------------------
+            */
+
+            $borrowerName =
+                $issuedBorrowing->borrower?->name
+                ?? $borrower->name
+                ?? 'the selected borrower';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | BOOK TITLE
+            |----------------------------------------------------------------------
+            */
+
+            $bookTitle =
+                $issuedBorrowing->book?->title
+                ?? 'Selected Book';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | BUILD COPY DESCRIPTION
+            |----------------------------------------------------------------------
+            */
+
+            $copyDescription =
+                'Physical copy: '
+                . $copyNumber;
+
+
+            if ($accessionNumber) {
+
+                $copyDescription .=
+                    ' | Accession: '
+                    . $accessionNumber;
+
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
+            | CREATE NOTIFICATION
+            |----------------------------------------------------------------------
+            */
+
+            $this->createSystemNotification(
+
+                title: 'Book Issued Successfully',
+
+                message:
+                    'The book "'
+                    . $bookTitle
+                    . '" '
+                    . '('
+                    . $copyDescription
+                    . ') '
+                    . 'has been issued to '
+                    . $borrowerName
+                    . '.',
+
+                type: 'success',
+
+                url: route(
+                    'borrowings.show',
+                    $issuedBorrowing
+                )
+
+            );
+
+        }
+
+
         return redirect()
             ->route('borrowings.index')
             ->with(
@@ -782,11 +954,15 @@ class BorrowingController extends Controller
         ]);
 
 
+        $returnedBorrowing = null;
+
+
         try {
 
             DB::transaction(function () use (
                 $borrowing,
-                $validated
+                $validated,
+                &$returnedBorrowing
             ) {
 
                 /*
@@ -795,12 +971,14 @@ class BorrowingController extends Controller
                 |------------------------------------------------------------------
                 */
 
-                $borrowing = Borrowing::lockForUpdate()
+                $lockedBorrowing = Borrowing::lockForUpdate()
                     ->with([
 
                         'book',
 
                         'bookCopy',
+
+                        'borrower',
 
                     ])
                     ->findOrFail(
@@ -814,7 +992,7 @@ class BorrowingController extends Controller
                 |------------------------------------------------------------------
                 */
 
-                if ($borrowing->status === 'returned') {
+                if ($lockedBorrowing->status === 'returned') {
 
                     throw new \Exception(
                         'This book has already been returned.'
@@ -831,7 +1009,7 @@ class BorrowingController extends Controller
 
                 $bookCopy = BookCopy::lockForUpdate()
                     ->findOrFail(
-                        $borrowing->book_copy_id
+                        $lockedBorrowing->book_copy_id
                     );
 
 
@@ -853,7 +1031,7 @@ class BorrowingController extends Controller
                 |------------------------------------------------------------------
                 */
 
-                $borrowing->update([
+                $lockedBorrowing->update([
 
                     'status' => 'returned',
 
@@ -895,7 +1073,7 @@ class BorrowingController extends Controller
 
                 $book = Book::lockForUpdate()
                     ->findOrFail(
-                        $borrowing->book_id
+                        $lockedBorrowing->book_id
                     );
 
 
@@ -929,6 +1107,15 @@ class BorrowingController extends Controller
 
                 ]);
 
+
+                /*
+                |------------------------------------------------------------------
+                | SAVE RETURNED BORROWING
+                |------------------------------------------------------------------
+                */
+
+                $returnedBorrowing = $lockedBorrowing;
+
             });
 
         } catch (\Exception $exception) {
@@ -938,6 +1125,176 @@ class BorrowingController extends Controller
                     'error',
                     $exception->getMessage()
                 );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE RETURN NOTIFICATION
+        |--------------------------------------------------------------------------
+        */
+
+        if ($returnedBorrowing) {
+
+            /*
+            |----------------------------------------------------------------------
+            | LOAD ALL REQUIRED RELATIONSHIPS
+            |----------------------------------------------------------------------
+            */
+
+            $returnedBorrowing->load([
+                'book',
+                'bookCopy',
+                'borrower',
+            ]);
+
+
+            /*
+            |----------------------------------------------------------------------
+            | BOOK TITLE
+            |----------------------------------------------------------------------
+            */
+
+            $bookTitle =
+                $returnedBorrowing->book?->title
+                ?? 'Selected Book';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | EXACT PHYSICAL COPY NUMBER
+            |----------------------------------------------------------------------
+            */
+
+            $copyNumber =
+                $returnedBorrowing->bookCopy?->copy_number
+                ?? 'Unknown Copy';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | ACCESSION NUMBER
+            |----------------------------------------------------------------------
+            */
+
+            $accessionNumber =
+                $returnedBorrowing->bookCopy?->accession_number;
+
+
+            /*
+            |----------------------------------------------------------------------
+            | BORROWER NAME
+            |----------------------------------------------------------------------
+            */
+
+            $borrowerName =
+                $returnedBorrowing->borrower?->name
+                ?? 'Unknown borrower';
+
+
+            /*
+            |----------------------------------------------------------------------
+            | COPY DESCRIPTION
+            |----------------------------------------------------------------------
+            */
+
+            $copyDescription =
+                'Physical copy: '
+                . $copyNumber;
+
+
+            if ($accessionNumber) {
+
+                $copyDescription .=
+                    ' | Accession: '
+                    . $accessionNumber;
+
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
+            | RETURN CONDITION
+            |----------------------------------------------------------------------
+            */
+
+            if (
+                $validated['return_condition'] === 'damaged'
+            ) {
+
+                $conditionMessage =
+                    'The book was returned with damage.';
+
+
+            } else {
+
+                $conditionMessage =
+                    'The book was returned in good condition.';
+
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
+            | DAMAGE DESCRIPTION
+            |----------------------------------------------------------------------
+            */
+
+            $damageDescription =
+                '';
+
+
+            if (
+                $validated['return_condition'] === 'damaged'
+                &&
+                !empty($validated['damage_description'])
+            ) {
+
+                $damageDescription =
+                    ' Damage description: '
+                    . trim(
+                        $validated['damage_description']
+                    )
+                    . '.';
+
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
+            | CREATE NOTIFICATION
+            |----------------------------------------------------------------------
+            */
+
+            $this->createSystemNotification(
+
+                title: 'Book Returned',
+
+                message:
+                    'The book "'
+                    . $bookTitle
+                    . '" '
+                    . '('
+                    . $copyDescription
+                    . ') '
+                    . 'has been returned by '
+                    . $borrowerName
+                    . ' successfully. '
+                    . $conditionMessage
+                    . $damageDescription,
+
+                type:
+                    $validated['return_condition'] === 'damaged'
+                        ? 'warning'
+                        : 'success',
+
+                url: route(
+                    'borrowings.show',
+                    $returnedBorrowing
+                )
+
+            );
 
         }
 
