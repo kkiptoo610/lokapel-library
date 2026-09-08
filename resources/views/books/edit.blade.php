@@ -63,7 +63,9 @@
 
 
 
+{{-- ========================================================= --}}
 {{-- BOOK INFORMATION --}}
+{{-- ========================================================= --}}
 
 <div class="card shadow-sm mb-4">
 
@@ -82,13 +84,19 @@
             <div class="row">
 
 
+                {{-- ========================================================= --}}
                 {{-- BOOK TITLE --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
-                    <label for="title" class="form-label">
+                    <label
+                        for="title"
+                        class="form-label"
+                    >
 
                         Book Title
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -114,13 +122,19 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- BOOK CODE --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
-                    <label for="book_code" class="form-label">
+                    <label
+                        for="book_code"
+                        class="form-label"
+                    >
 
                         Book Code
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -146,13 +160,22 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- AUTHOR --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
-                    <label for="author" class="form-label">
+                    <label
+                        for="author"
+                        class="form-label"
+                    >
 
                         Author
+
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
 
                     </label>
 
@@ -162,7 +185,7 @@
                         name="author"
                         class="form-control @error('author') is-invalid @enderror"
                         value="{{ old('author', $book->author) }}"
-                        required
+                        placeholder="Enter author name"
                     >
 
                     @error('author')
@@ -178,13 +201,22 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- ISBN --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
-                    <label for="isbn" class="form-label">
+                    <label
+                        for="isbn"
+                        class="form-label"
+                    >
 
                         ISBN
+
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
 
                     </label>
 
@@ -194,6 +226,7 @@
                         name="isbn"
                         class="form-control @error('isbn') is-invalid @enderror"
                         value="{{ old('isbn', $book->isbn) }}"
+                        placeholder="Enter ISBN if available"
                     >
 
                     @error('isbn')
@@ -209,9 +242,9 @@
                 </div>
 
 
-                {{-- ================================================= --}}
-                {{-- MAIN CATEGORY --}}
-                {{-- ================================================= --}}
+                {{-- ========================================================= --}}
+                {{-- CATEGORY --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
@@ -221,6 +254,7 @@
                     >
 
                         Category
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -273,9 +307,9 @@
                 </div>
 
 
-                {{-- ================================================= --}}
+                {{-- ========================================================= --}}
                 {{-- SUBCATEGORY --}}
-                {{-- ================================================= --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
@@ -285,6 +319,7 @@
                     >
 
                         Subcategory
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -293,6 +328,7 @@
                         id="subcategory_id"
                         name="subcategory_id"
                         class="form-select @error('subcategory_id') is-invalid @enderror"
+                        required
                     >
 
                         <option value="">
@@ -345,13 +381,22 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- PUBLISHER --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
-                    <label for="publisher" class="form-label">
+                    <label
+                        for="publisher"
+                        class="form-label"
+                    >
 
                         Publisher
+
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
 
                     </label>
 
@@ -361,6 +406,7 @@
                         name="publisher"
                         class="form-control @error('publisher') is-invalid @enderror"
                         value="{{ old('publisher', $book->publisher) }}"
+                        placeholder="Enter publisher if available"
                     >
 
                     @error('publisher')
@@ -376,7 +422,9 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- PUBLICATION YEAR --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
@@ -386,6 +434,10 @@
                     >
 
                         Publication Year
+
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
 
                     </label>
 
@@ -397,6 +449,7 @@
                         value="{{ old('publication_year', $book->publication_year) }}"
                         min="1000"
                         max="{{ date('Y') }}"
+                        placeholder="Example: 2024"
                     >
 
                     @error('publication_year')
@@ -412,7 +465,9 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- SHELF LOCATION --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
@@ -422,6 +477,7 @@
                     >
 
                         Shelf Location
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -431,6 +487,8 @@
                         name="shelf_location"
                         class="form-control @error('shelf_location') is-invalid @enderror"
                         value="{{ old('shelf_location', $book->shelf_location) }}"
+                        placeholder="Example: Shelf A - Row 2"
+                        required
                     >
 
                     @error('shelf_location')
@@ -446,7 +504,9 @@
                 </div>
 
 
+                {{-- ========================================================= --}}
                 {{-- TOTAL COPIES --}}
+                {{-- ========================================================= --}}
 
                 <div class="col-md-6 mb-3">
 
@@ -481,7 +541,9 @@
             </div>
 
 
+            {{-- ========================================================= --}}
             {{-- COPY STATISTICS --}}
+            {{-- ========================================================= --}}
 
             <div class="row mt-3">
 
@@ -556,7 +618,9 @@
 
 
 
+{{-- ========================================================= --}}
 {{-- INDIVIDUAL COPIES --}}
+{{-- ========================================================= --}}
 
 <div class="card shadow-sm">
 
@@ -744,7 +808,9 @@
 
 
 
+{{-- ========================================================= --}}
 {{-- ADD COPY MODAL --}}
+{{-- ========================================================= --}}
 
 <div
     class="modal fade"
@@ -884,7 +950,7 @@
 
 
 {{-- ========================================================= --}}
-{{-- CATEGORY / SUBCATEGORY FILTER JAVASCRIPT --}}
+{{-- CATEGORY / SUBCATEGORY JAVASCRIPT --}}
 {{-- ========================================================= --}}
 
 <script>
@@ -906,68 +972,107 @@ document.addEventListener(
             );
 
 
-        function filterSubcategories()
+        const selectedSubcategoryId =
+            "{{ old('subcategory_id', $book->subcategory_id) }}";
+
+
+        const allSubcategoryOptions =
+            Array.from(
+                subcategorySelect.options
+            )
+            .filter(
+                option =>
+                    option.value !== ''
+            )
+            .map(
+                option =>
+                    option.cloneNode(true)
+            );
+
+
+        function loadSubcategories(
+            preserveSelected = true
+        )
         {
 
-            const selectedCategory =
+            const selectedCategoryId =
                 categorySelect.value;
 
 
-            Array.from(
-                subcategorySelect.options
-            ).forEach(
+            subcategorySelect.innerHTML =
+                '<option value="">Select Subcategory</option>';
+
+
+            if (
+                selectedCategoryId === ''
+            ) {
+
+                subcategorySelect.disabled =
+                    true;
+
+                return;
+
+            }
+
+
+            const matchingSubcategories =
+                allSubcategoryOptions.filter(
+                    function (option)
+                    {
+
+                        return (
+                            option.dataset.category
+                            ===
+                            selectedCategoryId
+                        );
+
+                    }
+                );
+
+
+            matchingSubcategories.forEach(
                 function (option)
                 {
 
-                    if (
-                        option.value === ''
-                    ) {
-
-                        option.hidden = false;
-
-                        return;
-
-                    }
+                    const clonedOption =
+                        option.cloneNode(true);
 
 
                     if (
-                        selectedCategory === ''
+                        preserveSelected
+                        &&
+                        clonedOption.value
+                        ===
+                        selectedSubcategoryId
                     ) {
 
-                        option.hidden = true;
+                        clonedOption.selected =
+                            true;
 
                     }
 
-                    else {
 
-                        option.hidden =
-                            option.dataset.category
-                            !==
-                            selectedCategory;
-
-                    }
+                    subcategorySelect.appendChild(
+                        clonedOption
+                    );
 
                 }
             );
 
 
-            const selectedOption =
-                subcategorySelect.options[
-                    subcategorySelect.selectedIndex
-                ];
-
-
             if (
-                selectedOption
-                &&
-                selectedOption.value !== ''
-                &&
-                selectedOption.dataset.category
-                !==
-                selectedCategory
+                matchingSubcategories.length > 0
             ) {
 
-                subcategorySelect.value = '';
+                subcategorySelect.disabled =
+                    false;
+
+            }
+
+            else {
+
+                subcategorySelect.disabled =
+                    true;
 
             }
 
@@ -979,15 +1084,17 @@ document.addEventListener(
             function ()
             {
 
-                subcategorySelect.value = '';
-
-                filterSubcategories();
+                loadSubcategories(
+                    false
+                );
 
             }
         );
 
 
-        filterSubcategories();
+        loadSubcategories(
+            true
+        );
 
     }
 );

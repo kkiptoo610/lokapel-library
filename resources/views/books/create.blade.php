@@ -73,6 +73,7 @@
                     >
 
                         Book Title
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -108,6 +109,7 @@
                     >
 
                         Book Code
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -148,6 +150,9 @@
                     >
 
                         Author
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
 
                     </label>
 
@@ -157,7 +162,7 @@
                         name="author"
                         class="form-control @error('author') is-invalid @enderror"
                         value="{{ old('author') }}"
-                        required
+                        placeholder="Enter author name"
                     >
 
                     @error('author')
@@ -183,6 +188,7 @@
                     >
 
                         Category
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -197,8 +203,6 @@
                             Select Category
                         </option>
 
-
-                        {{-- ONLY MAIN CATEGORIES --}}
 
                         @foreach($categories as $category)
 
@@ -241,6 +245,7 @@
                     >
 
                         Subcategory
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -249,15 +254,13 @@
                         name="subcategory_id"
                         class="form-select @error('subcategory_id') is-invalid @enderror"
                         disabled
+                        required
                     >
 
                         <option value="">
                             Select Subcategory
                         </option>
 
-
-                        {{-- ALL SUBCATEGORIES --}}
-                        {{-- JavaScript will filter them by parent_id --}}
 
                         @foreach($subcategories as $subcategory)
 
@@ -309,6 +312,10 @@
 
                         ISBN
 
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
+
                     </label>
 
                     <input
@@ -317,6 +324,7 @@
                         name="isbn"
                         class="form-control @error('isbn') is-invalid @enderror"
                         value="{{ old('isbn') }}"
+                        placeholder="Enter ISBN if available"
                     >
 
                     @error('isbn')
@@ -343,6 +351,10 @@
 
                         Publisher
 
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
+
                     </label>
 
                     <input
@@ -351,6 +363,7 @@
                         name="publisher"
                         class="form-control @error('publisher') is-invalid @enderror"
                         value="{{ old('publisher') }}"
+                        placeholder="Enter publisher if available"
                     >
 
                     @error('publisher')
@@ -377,6 +390,10 @@
 
                         Publication Year
 
+                        <span class="text-muted">
+                            (Optional)
+                        </span>
+
                     </label>
 
                     <input
@@ -387,6 +404,7 @@
                         value="{{ old('publication_year') }}"
                         min="1000"
                         max="{{ date('Y') }}"
+                        placeholder="Example: 2024"
                     >
 
                     @error('publication_year')
@@ -412,6 +430,7 @@
                     >
 
                         Total Copies
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -452,6 +471,7 @@
                     >
 
                         Shelf Location
+                        <span class="text-danger">*</span>
 
                     </label>
 
@@ -462,6 +482,7 @@
                         class="form-control @error('shelf_location') is-invalid @enderror"
                         value="{{ old('shelf_location') }}"
                         placeholder="Example: Shelf A - Row 2"
+                        required
                     >
 
                     @error('shelf_location')
@@ -573,13 +594,6 @@ document.addEventListener(
     function ()
     {
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | CATEGORY AND SUBCATEGORY
-        |--------------------------------------------------------------------------
-        */
-
         const categorySelect =
             document.getElementById(
                 'category_id'
@@ -590,6 +604,10 @@ document.addEventListener(
             document.getElementById(
                 'subcategory_id'
             );
+
+
+        const oldSubcategoryId =
+            "{{ old('subcategory_id') }}";
 
 
         /*
@@ -625,21 +643,9 @@ document.addEventListener(
                 categorySelect.value;
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | CLEAR CURRENT OPTIONS
-            |--------------------------------------------------------------------------
-            */
-
             subcategorySelect.innerHTML =
                 '<option value="">Select Subcategory</option>';
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | NO CATEGORY SELECTED
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 selectedCategoryId === ''
@@ -652,12 +658,6 @@ document.addEventListener(
 
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER MATCHING SUBCATEGORIES
-            |--------------------------------------------------------------------------
-            */
 
             const matchingSubcategories =
                 allSubcategoryOptions.filter(
@@ -674,29 +674,33 @@ document.addEventListener(
                 );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | ADD MATCHING OPTIONS
-            |--------------------------------------------------------------------------
-            */
-
             matchingSubcategories.forEach(
                 function (option)
                 {
 
+                    const clonedOption =
+                        option.cloneNode(true);
+
+
+                    if (
+                        clonedOption.value
+                        ===
+                        oldSubcategoryId
+                    ) {
+
+                        clonedOption.selected =
+                            true;
+
+                    }
+
+
                     subcategorySelect.appendChild(
-                        option.cloneNode(true)
+                        clonedOption
                     );
 
                 }
             );
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | ENABLE / DISABLE
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 matchingSubcategories.length > 0
@@ -717,28 +721,19 @@ document.addEventListener(
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CATEGORY CHANGE EVENT
-        |--------------------------------------------------------------------------
-        */
-
         categorySelect.addEventListener(
             'change',
             function ()
             {
+
+                subcategorySelect.value =
+                    '';
 
                 loadSubcategories();
 
             }
         );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | INITIAL LOAD
-        |--------------------------------------------------------------------------
-        */
 
         loadSubcategories();
 
@@ -792,12 +787,6 @@ document.addEventListener(
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | SAVE EXISTING VALUES
-            |--------------------------------------------------------------------------
-            */
-
             const currentValues =
                 [];
 
@@ -820,21 +809,9 @@ document.addEventListener(
             );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | CLEAR CONTAINER
-            |--------------------------------------------------------------------------
-            */
-
             copyNumbersContainer.innerHTML =
                 '';
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE NEW FIELDS
-            |--------------------------------------------------------------------------
-            */
 
             for (
                 let index = 0;
@@ -905,12 +882,6 @@ document.addEventListener(
                     '/026';
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | RESTORE VALUES
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     currentValues[index]
                 ) {
@@ -949,12 +920,6 @@ document.addEventListener(
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL COPIES EVENTS
-        |--------------------------------------------------------------------------
-        */
-
         totalCopiesInput.addEventListener(
             'input',
             generateCopyFields
@@ -967,14 +932,7 @@ document.addEventListener(
         );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | INITIAL COPY FIELDS
-        |--------------------------------------------------------------------------
-        */
-
         generateCopyFields();
-
 
     }
 );

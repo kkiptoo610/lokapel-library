@@ -7,6 +7,7 @@ use App\Models\BookCopy;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookController extends Controller
 {
@@ -20,7 +21,6 @@ class BookController extends Controller
             'subcategory',
             'copies',
         ]);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -66,11 +66,9 @@ class BookController extends Controller
 
         }
 
-
         $books = $query
             ->latest()
             ->get();
-
 
         return view(
             'books.index',
@@ -84,35 +82,15 @@ class BookController extends Controller
      */
     public function create()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | MAIN CATEGORIES
-        |--------------------------------------------------------------------------
-        |
-        | Main categories have parent_id = NULL.
-        |
-        */
-
         $categories = Category::query()
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUBCATEGORIES
-        |--------------------------------------------------------------------------
-        |
-        | Subcategories have parent_id filled.
-        |
-        */
-
         $subcategories = Category::query()
             ->whereNotNull('parent_id')
             ->orderBy('name')
             ->get();
-
 
         return view(
             'books.create',
@@ -125,22 +103,834 @@ class BookController extends Controller
 
 
     /**
+     * Show book import form.
+     */
+    public function showImportForm()
+    {
+        return view(
+            'books.import'
+        );
+    }
+
+
+    /**
+     * Download the CSV import template.
+     */
+    public function downloadTemplate(): StreamedResponse
+    {
+        $fileName = 'books-import-template.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' =>
+                'attachment; filename="' . $fileName . '"',
+        ];
+
+        $columns = [
+            'title',
+            'book code',
+            'category',
+            'subcategory',
+            'shelf',
+            'author',
+            'copies',
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        |
+        | These are example rows only.
+        | The category and subcategory names must exist in your database
+        | before importing the file.
+        |
+        */
+
+        $sampleRows = [
+            [
+                'Example Book Title',
+                'BOOK-001',
+                'Example Category',
+                'Example Subcategory',
+                'Shelf A1',
+                'John Doe',
+                '3',
+            ],
+            [
+                'Another Book',
+                'BOOK-002',
+                'Example Category',
+                'Example Subcategory',
+                'Shelf A2',
+                'Jane Doe',
+                '2',
+            ],
+        ];
+
+        return response()->stream(
+            function () use (
+                $columns,
+                $sampleRows
+            ) {
+
+                $output = fopen(
+                    'php://output',
+                    'w'
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | UTF-8 BOM
+                |--------------------------------------------------------------------------
+                |
+                | Helps Microsoft Excel display UTF-8 correctly.
+                |
+                */
+
+                fwrite(
+                    $output,
+                    "\xEF\xBB\xBF"
+                );
+
+                fputcsv(
+                    $output,
+                    $columns
+                );
+
+                foreach (
+                    $sampleRows
+                    as $row
+                ) {
+
+                    fputcsv(
+                        $output,
+                        $row
+                    );
+
+                }
+
+                fclose(
+                    $output
+                );
+
+            },
+            200,
+            $headers
+        );
+    }
+
+
+    /**
+     * Import books from CSV or Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+
+            'file' => [
+                'required',
+                'file',
+                'mimes:csv,txt,xlsx,xls',
+                'max:10240',
+            ],
+
+        ]);
+
+        $file = $request->file(
+            'file'
+        );
+
+        $extension = strtolower(
+            $file->getClientOriginalExtension()
+        );
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | READ FILE
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $extension === 'csv'
+                ||
+                $extension === 'txt'
+            ) {
+
+                $rows = $this->readCsvFile(
+                    $file->getRealPath()
+                );
+
+            } else {
+
+                return back()
+                    ->with(
+                        'error',
+                        'Excel import requires an Excel reader package. Please install PhpSpreadsheet or Laravel Excel first.'
+                    );
+
+            }
+
+            if (
+                count($rows) < 2
+            ) {
+
+                return back()
+                    ->with(
+                        'error',
+                        'The import file does not contain any book records.'
+                    );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NORMALIZE HEADERS
+            |--------------------------------------------------------------------------
+            */
+
+            $headers = array_map(
+                function ($header) {
+
+                    return strtolower(
+                        trim(
+                            preg_replace(
+                                '/^\xEF\xBB\xBF/',
+                                '',
+                                $header
+                            )
+                        )
+                    );
+
+                },
+                array_shift(
+                    $rows
+                )
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REQUIRED HEADERS
+            |--------------------------------------------------------------------------
+            */
+
+            $requiredHeaders = [
+
+                'title',
+
+                'book code',
+
+                'category',
+
+                'subcategory',
+
+                'shelf',
+
+                'author',
+
+                'copies',
+
+            ];
+
+
+            foreach (
+                $requiredHeaders
+                as $requiredHeader
+            ) {
+
+                if (
+                    !in_array(
+                        $requiredHeader,
+                        $headers
+                    )
+                ) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Missing required column: ' .
+                            $requiredHeader
+                        );
+
+                }
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HEADER INDEXES
+            |--------------------------------------------------------------------------
+            */
+
+            $titleIndex =
+                array_search(
+                    'title',
+                    $headers
+                );
+
+            $bookCodeIndex =
+                array_search(
+                    'book code',
+                    $headers
+                );
+
+            $categoryIndex =
+                array_search(
+                    'category',
+                    $headers
+                );
+
+            $subcategoryIndex =
+                array_search(
+                    'subcategory',
+                    $headers
+                );
+
+            $shelfIndex =
+                array_search(
+                    'shelf',
+                    $headers
+                );
+
+            $authorIndex =
+                array_search(
+                    'author',
+                    $headers
+                );
+
+            $copiesIndex =
+                array_search(
+                    'copies',
+                    $headers
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDATE ALL ROWS BEFORE IMPORT
+            |--------------------------------------------------------------------------
+            */
+
+            $importData = [];
+
+            $bookCodesInFile = [];
+
+            $rowNumber = 1;
+
+
+            foreach (
+                $rows
+                as $row
+            ) {
+
+                $rowNumber++;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SKIP EMPTY ROWS
+                |--------------------------------------------------------------------------
+                */
+
+                $rowIsEmpty = true;
+
+
+                foreach (
+                    $row
+                    as $value
+                ) {
+
+                    if (
+                        trim(
+                            (string) $value
+                        )
+                        !== ''
+                    ) {
+
+                        $rowIsEmpty = false;
+
+                        break;
+
+                    }
+
+                }
+
+
+                if ($rowIsEmpty) {
+
+                    continue;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | GET VALUES
+                |--------------------------------------------------------------------------
+                */
+
+                $title =
+                    trim(
+                        $row[$titleIndex]
+                        ?? ''
+                    );
+
+
+                $bookCode =
+                    trim(
+                        $row[$bookCodeIndex]
+                        ?? ''
+                    );
+
+
+                $categoryName =
+                    trim(
+                        $row[$categoryIndex]
+                        ?? ''
+                    );
+
+
+                $subcategoryName =
+                    trim(
+                        $row[$subcategoryIndex]
+                        ?? ''
+                    );
+
+
+                $shelf =
+                    trim(
+                        $row[$shelfIndex]
+                        ?? ''
+                    );
+
+
+                $author =
+                    trim(
+                        $row[$authorIndex]
+                        ?? ''
+                    );
+
+
+                $copies =
+                    $row[$copiesIndex]
+                    ?? '';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REQUIRED FIELD VALIDATION
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $title === ''
+                    ||
+                    $bookCode === ''
+                    ||
+                    $categoryName === ''
+                    ||
+                    $subcategoryName === ''
+                    ||
+                    $shelf === ''
+                    ||
+                    $copies === ''
+                ) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ' contains missing required information.'
+                        );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | VALIDATE COPIES
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !is_numeric(
+                        $copies
+                    )
+                    ||
+                    (int) $copies < 1
+                ) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ' must have at least 1 copy.'
+                        );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CHECK DUPLICATE BOOK CODE IN FILE
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    in_array(
+                        $bookCode,
+                        $bookCodesInFile
+                    )
+                ) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ': Duplicate Book Code "' .
+                            $bookCode .
+                            '" found in the import file.'
+                        );
+
+                }
+
+
+                $bookCodesInFile[] =
+                    $bookCode;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CHECK BOOK CODE IN DATABASE
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Book::where(
+                        'book_code',
+                        $bookCode
+                    )->exists()
+                ) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ': Book Code "' .
+                            $bookCode .
+                            '" already exists.'
+                        );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CHECK MAIN CATEGORY
+                |--------------------------------------------------------------------------
+                */
+
+                $category = Category::query()
+                    ->where(
+                        'name',
+                        $categoryName
+                    )
+                    ->whereNull(
+                        'parent_id'
+                    )
+                    ->first();
+
+
+                if (!$category) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ': Main category "' .
+                            $categoryName .
+                            '" does not exist.'
+                        );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CHECK SUBCATEGORY
+                |--------------------------------------------------------------------------
+                */
+
+                $subcategory = Category::query()
+                    ->where(
+                        'name',
+                        $subcategoryName
+                    )
+                    ->where(
+                        'parent_id',
+                        $category->id
+                    )
+                    ->first();
+
+
+                if (!$subcategory) {
+
+                    return back()
+                        ->with(
+                            'error',
+                            'Row ' .
+                            $rowNumber .
+                            ': Subcategory "' .
+                            $subcategoryName .
+                            '" does not belong to category "' .
+                            $categoryName .
+                            '".'
+                        );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | STORE VALIDATED ROW
+                |--------------------------------------------------------------------------
+                */
+
+                $importData[] = [
+
+                    'title' =>
+                        $title,
+
+                    'book_code' =>
+                        $bookCode,
+
+                    'category_id' =>
+                        $category->id,
+
+                    'subcategory_id' =>
+                        $subcategory->id,
+
+                    'shelf_location' =>
+                        $shelf,
+
+                    'author' =>
+                        $author !== ''
+                        ? $author
+                        : null,
+
+                    'copies' =>
+                        (int) $copies,
+
+                ];
+
+            }
+
+
+            if (
+                count(
+                    $importData
+                ) === 0
+            ) {
+
+                return back()
+                    ->with(
+                        'error',
+                        'No valid book records were found in the file.'
+                    );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IMPORT ALL BOOKS
+            |--------------------------------------------------------------------------
+            */
+
+            DB::transaction(
+                function () use (
+                    $importData
+                ) {
+
+                    foreach (
+                        $importData
+                        as $data
+                    ) {
+
+                        $book = Book::create([
+
+                            'title' =>
+                                $data['title'],
+
+                            'book_code' =>
+                                $data['book_code'],
+
+                            'author' =>
+                                $data['author'],
+
+                            'category_id' =>
+                                $data['category_id'],
+
+                            'subcategory_id' =>
+                                $data['subcategory_id'],
+
+                            'isbn' =>
+                                null,
+
+                            'publisher' =>
+                                null,
+
+                            'publication_year' =>
+                                null,
+
+                            'total_copies' =>
+                                $data['copies'],
+
+                            'available_copies' =>
+                                $data['copies'],
+
+                            'shelf_location' =>
+                                $data['shelf_location'],
+
+                        ]);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CREATE PHYSICAL COPIES
+                        |--------------------------------------------------------------------------
+                        */
+
+                        for (
+                            $number = 1;
+                            $number <= $data['copies'];
+                            $number++
+                        ) {
+
+                            BookCopy::create([
+
+                                'book_id' =>
+                                    $book->id,
+
+                                'accession_number' =>
+                                    $this->generateAccessionNumber(),
+
+                                'copy_number' =>
+                                    $book->book_code
+                                    .
+                                    '-COPY-'
+                                    .
+                                    str_pad(
+                                        $number,
+                                        3,
+                                        '0',
+                                        STR_PAD_LEFT
+                                    ),
+
+                                'status' =>
+                                    'available',
+
+                            ]);
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+            return redirect()
+                ->route(
+                    'books.index'
+                )
+                ->with(
+                    'success',
+                    count(
+                        $importData
+                    ) .
+                    ' book(s) imported successfully.'
+                );
+
+        } catch (
+            \Exception $exception
+        ) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Import failed: ' .
+                    $exception->getMessage()
+                );
+
+        }
+
+    }
+
+
+    /**
+     * Read CSV import file.
+     */
+    private function readCsvFile(
+        string $filePath
+    )
+    {
+        $rows = [];
+
+        $handle = fopen(
+            $filePath,
+            'r'
+        );
+
+        if (!$handle) {
+
+            throw new \Exception(
+                'Unable to read the CSV file.'
+            );
+
+        }
+
+        while (
+            (
+                $row = fgetcsv(
+                    $handle
+                )
+            )
+            !== false
+        ) {
+
+            $rows[] = $row;
+
+        }
+
+        fclose(
+            $handle
+        );
+
+        return $rows;
+    }
+
+
+    /**
      * Return subcategories for selected category.
      */
     public function subcategories(Category $category)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE CATEGORY IS A MAIN CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
         if ($category->parent_id !== null) {
 
             return response()->json([]);
 
         }
-
 
         $subcategories = Category::query()
             ->where(
@@ -153,7 +943,6 @@ class BookController extends Controller
                 'name',
                 'parent_id',
             ]);
-
 
         return response()->json(
             $subcategories
@@ -170,11 +959,9 @@ class BookController extends Controller
             'id'
         )->first();
 
-
         $nextNumber = $lastCopy
             ? $lastCopy->id + 1
             : 1;
-
 
         return 'ACC/' .
             str_pad(
@@ -195,7 +982,6 @@ class BookController extends Controller
             ->copies()
             ->count();
 
-
         $availableCopies = $book
             ->copies()
             ->where(
@@ -203,7 +989,6 @@ class BookController extends Controller
                 'available'
             )
             ->count();
-
 
         $book->update([
 
@@ -237,32 +1022,26 @@ class BookController extends Controller
                 'unique:books,book_code',
             ],
 
-            'author' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | MAIN CATEGORY
-            |--------------------------------------------------------------------------
-            */
-
             'category_id' => [
                 'required',
                 'exists:categories,id',
             ],
 
-            /*
-            |--------------------------------------------------------------------------
-            | SUBCATEGORY
-            |--------------------------------------------------------------------------
-            */
-
             'subcategory_id' => [
-                'nullable',
+                'required',
                 'exists:categories,id',
+            ],
+
+            'shelf_location' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'author' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'isbn' => [
@@ -291,12 +1070,6 @@ class BookController extends Controller
                 'min:1',
             ],
 
-            'shelf_location' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
             'copy_numbers' => [
                 'required',
                 'array',
@@ -313,12 +1086,6 @@ class BookController extends Controller
 
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE SELECTED CATEGORY IS MAIN CATEGORY
-        |--------------------------------------------------------------------------
-        */
 
         $mainCategory = Category::query()
             ->where(
@@ -345,51 +1112,31 @@ class BookController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE SUBCATEGORY BELONGS TO MAIN CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            !empty(
+        $validSubcategory = Category::query()
+            ->where(
+                'id',
                 $validated['subcategory_id']
             )
-        ) {
-
-            $validSubcategory = Category::query()
-                ->where(
-                    'id',
-                    $validated['subcategory_id']
-                )
-                ->where(
-                    'parent_id',
-                    $validated['category_id']
-                )
-                ->exists();
+            ->where(
+                'parent_id',
+                $validated['category_id']
+            )
+            ->exists();
 
 
-            if (!$validSubcategory) {
+        if (!$validSubcategory) {
 
-                return back()
-                    ->withInput()
-                    ->withErrors([
+            return back()
+                ->withInput()
+                ->withErrors([
 
-                        'subcategory_id' =>
-                            'The selected subcategory does not belong to the selected category.',
+                    'subcategory_id' =>
+                        'The selected subcategory does not belong to the selected category.',
 
-                    ]);
-
-            }
+                ]);
 
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE COPY COUNT MATCHES
-        |--------------------------------------------------------------------------
-        */
 
         if (
             count(
@@ -411,19 +1158,15 @@ class BookController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREATE BOOK
-        |--------------------------------------------------------------------------
-        */
-
         DB::transaction(
             function () use ($validated) {
 
                 $book = Book::create([
 
                     'title' =>
-                        $validated['title'],
+                        trim(
+                            $validated['title']
+                        ),
 
                     'book_code' =>
                         trim(
@@ -431,22 +1174,37 @@ class BookController extends Controller
                         ),
 
                     'author' =>
-                        $validated['author'],
+                        !empty(
+                            $validated['author']
+                        )
+                        ? trim(
+                            $validated['author']
+                        )
+                        : null,
 
                     'category_id' =>
                         $validated['category_id'],
 
                     'subcategory_id' =>
-                        $validated['subcategory_id']
-                        ?? null,
+                        $validated['subcategory_id'],
 
                     'isbn' =>
-                        $validated['isbn']
-                        ?? null,
+                        !empty(
+                            $validated['isbn']
+                        )
+                        ? trim(
+                            $validated['isbn']
+                        )
+                        : null,
 
                     'publisher' =>
-                        $validated['publisher']
-                        ?? null,
+                        !empty(
+                            $validated['publisher']
+                        )
+                        ? trim(
+                            $validated['publisher']
+                        )
+                        : null,
 
                     'publication_year' =>
                         $validated['publication_year']
@@ -459,17 +1217,12 @@ class BookController extends Controller
                         $validated['total_copies'],
 
                     'shelf_location' =>
-                        $validated['shelf_location']
-                        ?? null,
+                        trim(
+                            $validated['shelf_location']
+                        ),
 
                 ]);
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | CREATE PHYSICAL COPIES
-                |--------------------------------------------------------------------------
-                */
 
                 foreach (
                     $validated['copy_numbers']
@@ -556,29 +1309,15 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | MAIN CATEGORIES
-        |--------------------------------------------------------------------------
-        */
-
         $categories = Category::query()
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALL SUBCATEGORIES
-        |--------------------------------------------------------------------------
-        */
-
         $subcategories = Category::query()
             ->whereNotNull('parent_id')
             ->orderBy('name')
             ->get();
-
 
         $book->load([
 
@@ -631,20 +1370,26 @@ class BookController extends Controller
                 'unique:books,book_code,' . $book->id,
             ],
 
-            'author' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
             'category_id' => [
                 'required',
                 'exists:categories,id',
             ],
 
             'subcategory_id' => [
-                'nullable',
+                'required',
                 'exists:categories,id',
+            ],
+
+            'shelf_location' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'author' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'isbn' => [
@@ -673,20 +1418,8 @@ class BookController extends Controller
                 'min:1',
             ],
 
-            'shelf_location' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE CATEGORY IS A MAIN CATEGORY
-        |--------------------------------------------------------------------------
-        */
 
         $mainCategory = Category::query()
             ->where(
@@ -713,42 +1446,28 @@ class BookController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | ENSURE SUBCATEGORY BELONGS TO CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            !empty(
+        $validSubcategory = Category::query()
+            ->where(
+                'id',
                 $validated['subcategory_id']
             )
-        ) {
-
-            $validSubcategory = Category::query()
-                ->where(
-                    'id',
-                    $validated['subcategory_id']
-                )
-                ->where(
-                    'parent_id',
-                    $validated['category_id']
-                )
-                ->exists();
+            ->where(
+                'parent_id',
+                $validated['category_id']
+            )
+            ->exists();
 
 
-            if (!$validSubcategory) {
+        if (!$validSubcategory) {
 
-                return back()
-                    ->withInput()
-                    ->withErrors([
+            return back()
+                ->withInput()
+                ->withErrors([
 
-                        'subcategory_id' =>
-                            'The selected subcategory does not belong to the selected category.',
+                    'subcategory_id' =>
+                        'The selected subcategory does not belong to the selected category.',
 
-                    ]);
-
-            }
+                ]);
 
         }
 
@@ -788,16 +1507,12 @@ class BookController extends Controller
                         ->count();
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | UPDATE BOOK
-                    |--------------------------------------------------------------------------
-                    */
-
                     $book->update([
 
                         'title' =>
-                            $validated['title'],
+                            trim(
+                                $validated['title']
+                            ),
 
                         'book_code' =>
                             trim(
@@ -805,39 +1520,49 @@ class BookController extends Controller
                             ),
 
                         'author' =>
-                            $validated['author'],
+                            !empty(
+                                $validated['author']
+                            )
+                            ? trim(
+                                $validated['author']
+                            )
+                            : null,
 
                         'category_id' =>
                             $validated['category_id'],
 
                         'subcategory_id' =>
-                            $validated['subcategory_id']
-                            ?? null,
+                            $validated['subcategory_id'],
 
                         'isbn' =>
-                            $validated['isbn']
-                            ?? null,
+                            !empty(
+                                $validated['isbn']
+                            )
+                            ? trim(
+                                $validated['isbn']
+                            )
+                            : null,
 
                         'publisher' =>
-                            $validated['publisher']
-                            ?? null,
+                            !empty(
+                                $validated['publisher']
+                            )
+                            ? trim(
+                                $validated['publisher']
+                            )
+                            : null,
 
                         'publication_year' =>
                             $validated['publication_year']
                             ?? null,
 
                         'shelf_location' =>
-                            $validated['shelf_location']
-                            ?? null,
+                            trim(
+                                $validated['shelf_location']
+                            ),
 
                     ]);
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | ADD COPIES
-                    |--------------------------------------------------------------------------
-                    */
 
                     if (
                         $validated['total_copies']
@@ -886,12 +1611,6 @@ class BookController extends Controller
 
                     }
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | REMOVE AVAILABLE COPIES
-                    |--------------------------------------------------------------------------
-                    */
 
                     if (
                         $validated['total_copies']
@@ -944,12 +1663,6 @@ class BookController extends Controller
 
                     }
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | RECALCULATE TOTALS
-                    |--------------------------------------------------------------------------
-                    */
 
                     $this->recalculateBookTotals(
                         $book
@@ -1095,12 +1808,6 @@ class BookController extends Controller
 
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PROTECT BORROWED COPY
-        |--------------------------------------------------------------------------
-        */
 
         if (
             $copy->status === 'borrowed'

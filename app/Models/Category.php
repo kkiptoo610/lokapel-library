@@ -9,6 +9,10 @@ class Category extends Model
 {
     use HasFactory;
 
+
+    /**
+     * Fields that can be mass assigned.
+     */
     protected $fillable = [
 
         'name',
@@ -22,6 +26,8 @@ class Category extends Model
 
     /**
      * Parent category.
+     *
+     * A subcategory belongs to one main category.
      */
     public function parent()
     {
@@ -34,6 +40,8 @@ class Category extends Model
 
     /**
      * Child categories / subcategories.
+     *
+     * A main category can have many subcategories.
      */
     public function children()
     {
@@ -49,6 +57,8 @@ class Category extends Model
 
     /**
      * Books assigned directly to this category.
+     *
+     * Uses books.category_id.
      */
     public function books()
     {
@@ -59,6 +69,23 @@ class Category extends Model
     }
 
 
+    /**
+     * Books assigned to this category as a subcategory.
+     *
+     * Uses books.subcategory_id.
+     */
+    public function subcategoryBooks()
+    {
+        return $this->hasMany(
+            Book::class,
+            'subcategory_id'
+        );
+    }
+
+
+    /**
+     * Check if this is a main category.
+     */
     public function isMainCategory()
     {
         return is_null(
@@ -67,6 +94,9 @@ class Category extends Model
     }
 
 
+    /**
+     * Check if this is a subcategory.
+     */
     public function isSubcategory()
     {
         return !is_null(

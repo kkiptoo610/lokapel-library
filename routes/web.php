@@ -339,6 +339,72 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Book Import Routes
+    |--------------------------------------------------------------------------
+    |
+    | These routes MUST come before the books resource route.
+    |
+    */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Show Book Import Form
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/books/import',
+        [BookController::class, 'showImportForm']
+    )->name(
+        'books.import.form'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Process Book Import
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/books/import',
+        [BookController::class, 'import']
+    )->name(
+        'books.import'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Download Book Import CSV Template
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/books/template/download',
+        [BookController::class, 'downloadTemplate']
+    )->name(
+        'books.template.download'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Get Subcategories For Selected Category
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/books/categories/{category}/subcategories',
+        [BookController::class, 'subcategories']
+    )->name(
+        'books.subcategories'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Book Management
     |--------------------------------------------------------------------------
     */
@@ -351,50 +417,61 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Add Individual Copy
+    | Add Individual Book Copy
     |--------------------------------------------------------------------------
     */
 
     Route::post(
         '/books/{book}/copies',
         [BookController::class, 'storeCopy']
-    )->name('books.copies.store');
+    )->name(
+        'books.copies.store'
+    );
 
 
     /*
     |--------------------------------------------------------------------------
-    | Update Individual Copy
+    | Update Individual Book Copy
     |--------------------------------------------------------------------------
     */
 
     Route::put(
         '/books/{book}/copies/{copy}',
         [BookController::class, 'updateCopy']
-    )->name('books.copies.update');
+    )->name(
+        'books.copies.update'
+    );
 
 
     /*
     |--------------------------------------------------------------------------
-    | Delete Individual Copy
+    | Delete Individual Book Copy
     |--------------------------------------------------------------------------
     */
 
     Route::delete(
         '/books/{book}/copies/{copy}',
         [BookController::class, 'destroyCopy']
-    )->name('books.copies.destroy');
+    )->name(
+        'books.copies.destroy'
+    );
 
 
     /*
     |--------------------------------------------------------------------------
     | Book Copies By Status
     |--------------------------------------------------------------------------
+    |
+    | This route requires a statusList() method in BookController.
+    |
     */
 
     Route::get(
         '/books/status/{status}',
         [BookController::class, 'statusList']
-    )->name('books.status');
+    )->name(
+        'books.status'
+    );
 
 
     /*
@@ -430,13 +507,17 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/learners/import',
         [LearnerController::class, 'showImportForm']
-    )->name('learners.import.form');
+    )->name(
+        'learners.import.form'
+    );
 
 
     Route::post(
         '/learners/import',
         [LearnerController::class, 'import']
-    )->name('learners.import');
+    )->name(
+        'learners.import'
+    );
 
 
     /*
@@ -448,7 +529,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/learners/template/download',
         [LearnerController::class, 'downloadTemplate']
-    )->name('learners.template.download');
+    )->name(
+        'learners.template.download'
+    );
 
 
     /*
@@ -479,7 +562,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/borrowings',
         [BorrowingController::class, 'index']
-    )->name('borrowings.index');
+    )->name(
+        'borrowings.index'
+    );
 
 
     /*
@@ -491,7 +576,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/borrowings/create',
         [BorrowingController::class, 'create']
-    )->name('borrowings.create');
+    )->name(
+        'borrowings.create'
+    );
 
 
     /*
@@ -503,7 +590,9 @@ Route::middleware('auth')->group(function () {
     Route::post(
         '/borrowings',
         [BorrowingController::class, 'store']
-    )->name('borrowings.store');
+    )->name(
+        'borrowings.store'
+    );
 
 
     /*
@@ -515,7 +604,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/borrowings/{borrowing}',
         [BorrowingController::class, 'show']
-    )->name('borrowings.show');
+    )->name(
+        'borrowings.show'
+    );
 
 
     /*
@@ -527,7 +618,9 @@ Route::middleware('auth')->group(function () {
     Route::post(
         '/borrowings/{borrowing}/return',
         [BorrowingController::class, 'returnBook']
-    )->name('borrowings.return');
+    )->name(
+        'borrowings.return'
+    );
 
 
     /*
@@ -539,7 +632,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports',
         [ReportController::class, 'index']
-    )->name('reports.index');
+    )->name(
+        'reports.index'
+    );
 
 
     /*
@@ -551,7 +646,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/borrowings',
         [ReportController::class, 'borrowings']
-    )->name('reports.borrowings');
+    )->name(
+        'reports.borrowings'
+    );
 
 
     /*
@@ -563,7 +660,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/borrowings/preview',
         [ReportController::class, 'borrowingsPreview']
-    )->name('reports.borrowings.preview');
+    )->name(
+        'reports.borrowings.preview'
+    );
 
 
     /*
@@ -575,7 +674,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/borrowings/book/{book}',
         [ReportController::class, 'borrowingBookDetails']
-    )->name('reports.borrowings.book-details');
+    )->name(
+        'reports.borrowings.book-details'
+    );
 
 
     /*
@@ -587,7 +688,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/class-borrowing',
         [ReportController::class, 'classBorrowing']
-    )->name('reports.class-borrowing');
+    )->name(
+        'reports.class-borrowing'
+    );
 
 
     /*
@@ -599,7 +702,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/class-borrowing/preview',
         [ReportController::class, 'classBorrowingPreview']
-    )->name('reports.class-borrowing.preview');
+    )->name(
+        'reports.class-borrowing.preview'
+    );
 
 
     /*
@@ -611,7 +716,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/overdue',
         [ReportController::class, 'overdue']
-    )->name('reports.overdue');
+    )->name(
+        'reports.overdue'
+    );
 
 
     /*
@@ -623,7 +730,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/overdue/preview',
         [ReportController::class, 'overduePreview']
-    )->name('reports.overdue.preview');
+    )->name(
+        'reports.overdue.preview'
+    );
 
 
     /*
@@ -635,7 +744,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/returned',
         [ReportController::class, 'returned']
-    )->name('reports.returned');
+    )->name(
+        'reports.returned'
+    );
 
 
     /*
@@ -647,7 +758,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/returned/preview',
         [ReportController::class, 'returnedPreview']
-    )->name('reports.returned.preview');
+    )->name(
+        'reports.returned.preview'
+    );
 
 
     /*
@@ -659,7 +772,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/damaged',
         [ReportController::class, 'damaged']
-    )->name('reports.damaged');
+    )->name(
+        'reports.damaged'
+    );
 
 
     /*
@@ -671,23 +786,23 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/damaged/preview',
         [ReportController::class, 'damagedPreview']
-    )->name('reports.damaged.preview');
+    )->name(
+        'reports.damaged.preview'
+    );
 
 
     /*
     |--------------------------------------------------------------------------
     | Library Inventory Report
     |--------------------------------------------------------------------------
-    |
-    | This remains because it reports on library books
-    | and book copies, not the removed store inventory system.
-    |
     */
 
     Route::get(
         '/reports/inventory',
         [ReportController::class, 'inventory']
-    )->name('reports.inventory');
+    )->name(
+        'reports.inventory'
+    );
 
 
     /*
@@ -699,7 +814,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/inventory/preview',
         [ReportController::class, 'inventoryPreview']
-    )->name('reports.inventory.preview');
+    )->name(
+        'reports.inventory.preview'
+    );
 
 
     /*
@@ -711,7 +828,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/popular-books',
         [ReportController::class, 'popularBooks']
-    )->name('reports.popular-books');
+    )->name(
+        'reports.popular-books'
+    );
 
 
     /*
@@ -723,7 +842,9 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/borrower-activity',
         [ReportController::class, 'borrowerActivity']
-    )->name('reports.borrower-activity');
+    )->name(
+        'reports.borrower-activity'
+    );
 
 
     /*
@@ -735,6 +856,8 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/reports/borrower-activity/preview',
         [ReportController::class, 'borrowerActivityPreview']
-    )->name('reports.borrower-activity.preview');
+    )->name(
+        'reports.borrower-activity.preview'
+    );
 
 });

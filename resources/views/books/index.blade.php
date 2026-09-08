@@ -42,19 +42,88 @@
         </div>
 
 
-        <a
-            href="{{ route('books.create') }}"
-            class="add-book-btn"
-        >
+        {{-- ========================================================= --}}
+        {{-- HEADER ACTIONS --}}
+        {{-- ========================================================= --}}
 
-            <i class="bi bi-plus-circle-fill"></i>
+        <div class="header-actions">
 
-            Add New Book
 
-        </a>
+            {{-- IMPORT BOOKS --}}
+
+            <a
+                href="{{ route('books.import.form') }}"
+                class="import-book-btn"
+            >
+
+                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+
+                Import Books
+
+            </a>
+
+
+            {{-- ADD NEW BOOK --}}
+
+            <a
+                href="{{ route('books.create') }}"
+                class="add-book-btn"
+            >
+
+                <i class="bi bi-plus-circle-fill"></i>
+
+                Add New Book
+
+            </a>
+
+
+        </div>
 
 
     </div>
+
+
+
+    {{-- ========================================================= --}}
+    {{-- SUCCESS / ERROR MESSAGES --}}
+    {{-- ========================================================= --}}
+
+    @if(session('success'))
+
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            {{ session('success') }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+            ></button>
+
+        </div>
+
+    @endif
+
+
+    @if(session('error'))
+
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+            {{ session('error') }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+            ></button>
+
+        </div>
+
+    @endif
 
 
 
@@ -271,6 +340,18 @@
 
                             $borrowedCopies =
                                 $totalCopies - $availableCopies;
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | DELETE PROTECTION
+                            |--------------------------------------------------------------------------
+                            |
+                            | A book can only be deleted when there are no borrowed copies.
+                            |
+                            */
+
+                            $canDelete =
+                                $borrowedCopies <= 0;
 
                         @endphp
 
@@ -540,12 +621,14 @@
                                 <div class="action-buttons">
 
 
+                                    {{-- ========================================================= --}}
                                     {{-- VIEW --}}
+                                    {{-- ========================================================= --}}
 
                                     <a
                                         href="{{ route('books.show', $book) }}"
                                         class="action-btn view-btn"
-                                        title="View Book and Copies"
+                                        title="View Book and Physical Copies"
                                     >
 
                                         <i class="bi bi-eye-fill"></i>
@@ -554,7 +637,64 @@
 
 
 
+                                    {{-- ========================================================= --}}
+                                    {{-- DELETE --}}
+                                    {{-- NEXT TO VIEW --}}
+                                    {{-- ========================================================= --}}
+
+                                    @if($canDelete)
+
+
+                                        <form
+                                            action="{{ route('books.destroy', $book) }}"
+                                            method="POST"
+                                            class="d-inline delete-book-form"
+                                            onsubmit="return confirm('Are you sure you want to permanently delete this book? All of its physical copies will also be permanently deleted. This action cannot be undone.')"
+                                        >
+
+
+                                            @csrf
+
+                                            @method('DELETE')
+
+
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn delete-btn"
+                                                title="Delete Book and All Physical Copies"
+                                            >
+
+                                                <i class="bi bi-trash-fill"></i>
+
+                                            </button>
+
+
+                                        </form>
+
+
+                                    @else
+
+
+                                        <button
+                                            type="button"
+                                            class="action-btn delete-btn delete-disabled"
+                                            title="Cannot delete this book because {{ $borrowedCopies }} copy/copies are currently borrowed."
+                                            disabled
+                                        >
+
+                                            <i class="bi bi-trash-fill"></i>
+
+                                        </button>
+
+
+                                    @endif
+
+
+
+                                    {{-- ========================================================= --}}
                                     {{-- EDIT --}}
+                                    {{-- ========================================================= --}}
 
                                     <a
                                         href="{{ route('books.edit', $book) }}"
@@ -567,38 +707,26 @@
                                     </a>
 
 
-
-                                    {{-- DELETE --}}
-
-                                    <form
-                                        action="{{ route('books.destroy', $book) }}"
-                                        method="POST"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Are you sure you want to delete this book? All physical copies will also be deleted.')"
-                                    >
-
-
-                                        @csrf
-
-                                        @method('DELETE')
-
-
-
-                                        <button
-                                            type="submit"
-                                            class="action-btn delete-btn"
-                                            title="Delete Book"
-                                        >
-
-                                            <i class="bi bi-trash-fill"></i>
-
-                                        </button>
-
-
-                                    </form>
-
-
                                 </div>
+
+
+                                {{-- DELETE PROTECTION MESSAGE --}}
+
+                                @if(!$canDelete)
+
+
+                                    <small class="cannot-delete-message">
+
+                                        <i class="bi bi-lock-fill"></i>
+
+                                        Cannot delete while
+                                        {{ $borrowedCopies }}
+                                        copy/copies are borrowed.
+
+                                    </small>
+
+
+                                @endif
 
 
                             </td>
@@ -644,16 +772,34 @@
                                     </p>
 
 
-                                    <a
-                                        href="{{ route('books.create') }}"
-                                        class="btn btn-primary"
-                                    >
+                                    <div class="empty-books-actions">
 
-                                        <i class="bi bi-plus-circle"></i>
 
-                                        Add Your First Book
+                                        <a
+                                            href="{{ route('books.import.form') }}"
+                                            class="btn btn-outline-primary"
+                                        >
 
-                                    </a>
+                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+
+                                            Import Books
+
+                                        </a>
+
+
+                                        <a
+                                            href="{{ route('books.create') }}"
+                                            class="btn btn-primary"
+                                        >
+
+                                            <i class="bi bi-plus-circle"></i>
+
+                                            Add Your First Book
+
+                                        </a>
+
+
+                                    </div>
 
 
                                 </div>
@@ -803,6 +949,108 @@
 
 }
 
+
+
+/* ========================================================= */
+/* HEADER ACTIONS */
+/* ========================================================= */
+
+.header-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+
+/* ========================================================= */
+/* IMPORT BOOK BUTTON */
+/* ========================================================= */
+
+.import-book-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    padding: 12px 20px;
+
+    border-radius: 12px;
+
+    text-decoration: none;
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+
+    border:
+
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        );
+
+    color: white;
+
+    font-weight: 700;
+
+    transition:
+
+        all 0.25s ease;
+
+}
+
+
+.import-book-btn:hover {
+
+    color: white;
+
+    background:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+
+    transform:
+
+        translateY(-3px);
+
+    box-shadow:
+
+        0 8px 20px
+        rgba(
+            0,
+            0,
+            0,
+            0.15
+        );
+
+}
+
+
+
+/* ========================================================= */
+/* ADD BOOK BUTTON */
+/* ========================================================= */
 
 .add-book-btn {
 
@@ -1469,6 +1717,8 @@
 
     justify-content: flex-end;
 
+    align-items: center;
+
     gap: 7px;
 
 }
@@ -1508,6 +1758,11 @@
 }
 
 
+
+/* ========================================================= */
+/* VIEW BUTTON */
+/* ========================================================= */
+
 .view-btn {
 
     background: #e7f0ff;
@@ -1525,6 +1780,11 @@
 
 }
 
+
+
+/* ========================================================= */
+/* EDIT BUTTON */
+/* ========================================================= */
 
 .edit-btn {
 
@@ -1544,6 +1804,11 @@
 }
 
 
+
+/* ========================================================= */
+/* DELETE BUTTON */
+/* ========================================================= */
+
 .delete-btn {
 
     background: #ffe4e4;
@@ -1558,6 +1823,62 @@
     background: #dc2626;
 
     color: white;
+
+}
+
+
+
+/* ========================================================= */
+/* DISABLED DELETE BUTTON */
+/* ========================================================= */
+
+.delete-disabled {
+
+    opacity: 0.45;
+
+    cursor: not-allowed;
+
+    transform: none !important;
+
+}
+
+
+.delete-disabled:hover {
+
+    background: #ffe4e4;
+
+    color: #d63031;
+
+    transform: none;
+
+}
+
+
+
+/* ========================================================= */
+/* CANNOT DELETE MESSAGE */
+/* ========================================================= */
+
+.cannot-delete-message {
+
+    display: block;
+
+    margin-top: 6px;
+
+    text-align: right;
+
+    color: #d97706;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+
+}
+
+
+.cannot-delete-message i {
+
+    margin-right: 3px;
 
 }
 
@@ -1624,6 +1945,19 @@
 }
 
 
+.empty-books-actions {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
 
 /* ========================================================= */
 /* RESPONSIVE */
@@ -1642,6 +1976,17 @@
 
     }
 
+
+    .header-actions {
+
+        width: 100%;
+
+        flex-direction: column;
+
+    }
+
+
+    .import-book-btn,
 
     .add-book-btn {
 
@@ -1668,6 +2013,31 @@
         width: 100%;
 
         justify-content: center;
+
+    }
+
+
+    .empty-books-actions {
+
+        flex-direction: column;
+
+    }
+
+
+    .empty-books-actions .btn {
+
+        width: 100%;
+
+        max-width: 280px;
+
+    }
+
+
+    .cannot-delete-message {
+
+        text-align: center;
+
+        white-space: normal;
 
     }
 
